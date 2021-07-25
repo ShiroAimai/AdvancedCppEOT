@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MemoryManager", "MemoryMana
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ShirosMemoryManager", "ShirosMemoryManager\ShirosMemoryManager.vcxproj", "{54EE3191-658D-44E2-A2D2-E2FB1B141CF6}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BigInt", "BigInt\BigInt.vcxproj", "{76731BA9-5CFB-468C-9C44-2B138A73C6D1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -31,6 +33,14 @@ Global
 		{54EE3191-658D-44E2-A2D2-E2FB1B141CF6}.Release|x64.Build.0 = Release|x64
 		{54EE3191-658D-44E2-A2D2-E2FB1B141CF6}.Release|x86.ActiveCfg = Release|Win32
 		{54EE3191-658D-44E2-A2D2-E2FB1B141CF6}.Release|x86.Build.0 = Release|Win32
+		{76731BA9-5CFB-468C-9C44-2B138A73C6D1}.Debug|x64.ActiveCfg = Debug|x64
+		{76731BA9-5CFB-468C-9C44-2B138A73C6D1}.Debug|x64.Build.0 = Debug|x64
+		{76731BA9-5CFB-468C-9C44-2B138A73C6D1}.Debug|x86.ActiveCfg = Debug|Win32
+		{76731BA9-5CFB-468C-9C44-2B138A73C6D1}.Debug|x86.Build.0 = Debug|Win32
+		{76731BA9-5CFB-468C-9C44-2B138A73C6D1}.Release|x64.ActiveCfg = Release|x64
+		{76731BA9-5CFB-468C-9C44-2B138A73C6D1}.Release|x64.Build.0 = Release|x64
+		{76731BA9-5CFB-468C-9C44-2B138A73C6D1}.Release|x86.ActiveCfg = Release|Win32
+		{76731BA9-5CFB-468C-9C44-2B138A73C6D1}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
