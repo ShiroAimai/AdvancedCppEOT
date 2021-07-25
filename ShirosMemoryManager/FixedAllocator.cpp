@@ -7,7 +7,7 @@ void FixedAllocator::Chunk::Init(size_t blockSize, unsigned char blocks)
 	assert(blocks > 0); //chunk must be composed of at least one element (i.e an element of max size)
 	assert((blockSize * blocks) / blockSize == blocks); // check for overflow
 
-	m_data = static_cast<unsigned char*>(std::malloc(blockSize * blocks)); //reserve free store memory for the chunk. 
+	m_data = static_cast<unsigned char*>(std::malloc(blockSize * blocks)); //reserve heap memory for the chunk. 
 	Reset(blockSize, blocks);
 }
 
