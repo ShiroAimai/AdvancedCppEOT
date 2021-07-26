@@ -30,10 +30,8 @@ private:
 	void Sum(const BigInt& Other);
 	/*Sub other from this*/
 	void Sub(const BigInt& Other);
-	/*Multiply other for this*/
-	void Multiply(const BigInt& Other);
 	/*Divide this for other*/
-	void Divide(const BigInt& Other);
+	BigInt Divide(const BigInt& Other);
 
 public:
 	/* ==== CONSTRUCTORS ==== */
@@ -47,24 +45,48 @@ public:
 	~BigInt();
 
 	/* ==== OPERATORS ==== */
-	/*BigInt& operator=(const BigInt& other);
-	BigInt& operator=(BigInt&& other);
+	BigInt& operator=(const BigInt& other);
+	BigInt& operator=(BigInt&& other) noexcept;
+
+	BigInt& operator++();
+	BigInt operator++(int);
+	BigInt& operator--();
+	BigInt operator--(int);
 
 	BigInt& operator+=(const BigInt& rhs);
 	BigInt& operator-=(const BigInt& rhs);
 	BigInt& operator*=(const BigInt& rhs);
 	BigInt& operator/=(const BigInt& rhs);
 	BigInt& operator%=(const BigInt& rhs);
-	BigInt& operator&=(const BigInt& rhs);
+
+	friend BigInt operator+(const BigInt& a);
+	friend BigInt operator-(const BigInt& a);
+	friend BigInt operator+(const BigInt& a, const BigInt& b);
+	friend BigInt operator-(const BigInt& a, const BigInt& b);
+	friend BigInt operator*(const BigInt& a, const BigInt& b);
+	friend BigInt operator/(const BigInt& a, const BigInt& b);
+	friend BigInt operator%(const BigInt& a, const BigInt& b);
+
+
+	/*BigInt& operator&=(const BigInt& rhs);
 	BigInt& operator|=(const BigInt& rhs);
 	BigInt& operator^=(const BigInt& rhs);
 	BigInt& operator<<=(const BigInt& rhs);
-	BigInt& operator>>=(const BigInt& rhs);
+	BigInt& operator>>=(const BigInt& rhs); */
 
-	BigInt& operator++();
-	BigInt operator++(int);
-	BigInt& operator--();
-	BigInt operator--(int); */
-
+	/* ==== UTILITIES ==== */
+	enum class ComparationResult {
+		Equals,
+		Greater,
+		Less
+	};
+	ComparationResult CompareWith(const BigInt& Other) const;
 };
 
+inline BigInt operator+(const BigInt& a);
+inline BigInt operator-(const BigInt& a);
+inline BigInt operator+(const BigInt& a, const BigInt& b);
+inline BigInt operator-(const BigInt& a, const BigInt& b);
+inline BigInt operator*(const BigInt& a, const BigInt& b);
+inline BigInt operator/(const BigInt& a, const BigInt& b);
+inline BigInt operator%(const BigInt& a, const BigInt& b);
