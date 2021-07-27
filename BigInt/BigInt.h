@@ -22,11 +22,22 @@ private:
 	using SignedDoubleCapacityDataSeed = int64_t;
 	using BIDigits = std::deque<DataSeed>;
 
-	BIDigits m_value; //head indicates the low digital position
+	BIDigits m_value; //head (leftmost) indicates the low digital position
 	bool bIsNegative; 
+	
+	/*
+	Unsigned operation result type
+	* Internal use only
+	*/
+	struct UOperationResult
+	{
+		SignedDoubleCapacityDataSeed res;
 
+		DataSeed GetLowerHalf() const;
+		DataSeed GetHighHalf() const;
+	};
 private:
-	/*Sun other to this*/
+	/*Sum other to this*/
 	void Sum(const BigInt& Other);
 	/*Sub other from this*/
 	void Sub(const BigInt& Other);
@@ -37,7 +48,7 @@ public:
 	/* ==== CONSTRUCTORS ==== */
 	BigInt();
 	BigInt(SignedDataSeed Value);
-	//BigInt(const std::string& Value);
+	BigInt(const std::string& Value);
 	BigInt(const BigInt& Other);
 	BigInt(BigInt&& Other) noexcept;
 
@@ -67,12 +78,18 @@ public:
 	friend BigInt operator/(const BigInt& a, const BigInt& b);
 	friend BigInt operator%(const BigInt& a, const BigInt& b);
 
+	friend bool operator<(const BigInt& a, const BigInt& b);
+	friend bool operator<=(const BigInt& a, const BigInt& b);
+	friend bool operator>(const BigInt& a, const BigInt& b);
+	friend bool operator>=(const BigInt& a, const BigInt& b);
+	friend bool operator==(const BigInt& a, const BigInt& b);
+	friend bool operator!=(const BigInt& a, const BigInt& b);
 
-	/*BigInt& operator&=(const BigInt& rhs);
+	BigInt& operator&=(const BigInt& rhs);
 	BigInt& operator|=(const BigInt& rhs);
 	BigInt& operator^=(const BigInt& rhs);
 	BigInt& operator<<=(const BigInt& rhs);
-	BigInt& operator>>=(const BigInt& rhs); */
+	BigInt& operator>>=(const BigInt& rhs);
 
 	/* ==== UTILITIES ==== */
 	enum class ComparationResult {
@@ -90,3 +107,9 @@ inline BigInt operator-(const BigInt& a, const BigInt& b);
 inline BigInt operator*(const BigInt& a, const BigInt& b);
 inline BigInt operator/(const BigInt& a, const BigInt& b);
 inline BigInt operator%(const BigInt& a, const BigInt& b);
+inline bool operator<(const BigInt& a, const BigInt& b);
+inline bool operator<=(const BigInt& a, const BigInt& b);
+inline bool operator>(const BigInt& a, const BigInt& b);
+inline bool operator>=(const BigInt& a, const BigInt& b);
+inline bool operator==(const BigInt& a, const BigInt& b);
+inline bool operator!=(const BigInt& a, const BigInt& b);
