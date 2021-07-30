@@ -261,6 +261,20 @@ BigInt::operator DataSeed() const
 	return m_value[0];
 }
 
+BigInt::operator DoubleCapacityDataSeed() const
+{
+	DoubleCapacityDataSeed res = 0;
+	if (m_value.size() > 1)
+	{
+		res = m_value[1];
+	}
+
+	res <<= sizeof(DataSeed) * CHAR_BIT;
+	res |= m_value[0];
+
+	return res;
+}
+
 BigInt::operator bool() const {
 	return !m_value.empty();
 }
@@ -670,15 +684,15 @@ BigInt pow(const BigInt& base, const BigInt& exp)
 
 	while (_exp != 0)
 	{
-		bool isOdd = _exp.m_value[0] & 1;
+		bool isOdd = _exp.m_value[0] & 1; //check if the lowest digit of exp is odd
 		if (isOdd)
 		{
-			result *= _base;
+			result *= _base; //apply accumulated base
 		}
 
-		_exp >>= 1;
+		_exp >>= 1; //equivalent to dividing by two
 
-		_base *= _base;
+		_base *= _base; //accumulate base
 	}
 
 	return result;

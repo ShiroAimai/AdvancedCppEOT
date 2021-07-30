@@ -6,7 +6,7 @@
 /**
  * This class models an unlimited integer. Can contains an unlimited number of digits
  *
- * Not time efficient
+ * No time efficient
  * Space efficiency thanks to the deque
  * Random access thanks to the deque
  */
@@ -22,12 +22,12 @@ public:
 	using SignedDoubleCapacityDataSeed = int64_t;
 private:
 	using BIDigits = std::deque<DataSeed>;
-
+	//core internal state
 	BIDigits m_value; //head (leftmost) indicates the low digital position
 	bool bIsNegative;
 
 	/*
-	Unsigned operation result type
+	Unsigned operation result value class
 	* Internal use only
 	*/
 	struct UOperationResult
@@ -60,6 +60,7 @@ public:
 
 	explicit operator bool() const;
 	explicit operator DataSeed() const;
+	explicit operator DoubleCapacityDataSeed() const;
 
 	/* ==== DESTRUCTOR ==== */
 	~BigInt();
