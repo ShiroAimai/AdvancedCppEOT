@@ -731,3 +731,13 @@ std::ostream& operator<<(std::ostream& os, const BigInt& value)
 
 	return os;
 }
+
+bool BigInt::isOdd() const
+{
+	return m_value[0] % 2;
+}
+
+bool BigInt::isEven() const
+{
+	return !isOdd();
+}

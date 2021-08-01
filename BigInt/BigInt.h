@@ -69,6 +69,7 @@ public:
 	BigInt& operator=(const BigInt& other);
 	BigInt& operator=(BigInt&& other) noexcept;
 
+	/*ARITHMETIC OPERATORS*/
 	BigInt& operator++();
 	BigInt operator++(int);
 	BigInt& operator--();
@@ -88,6 +89,15 @@ public:
 	friend BigInt operator/(const BigInt& a, const BigInt& b);
 	friend BigInt operator%(const BigInt& a, const BigInt& b);
 
+	friend BigInt pow(const BigInt&, const BigInt&);
+
+	/*LOGICAL OPERATORS*/
+	BigInt& operator&=(const BigInt& rhs);
+	BigInt& operator|=(const BigInt& rhs);
+	BigInt& operator^=(const BigInt& rhs);
+	BigInt& operator<<=(const BigInt& rhs);
+	BigInt& operator>>=(const BigInt& rhs);
+
 	friend bool operator<(const BigInt& a, const BigInt& b);
 	friend bool operator<=(const BigInt& a, const BigInt& b);
 	friend bool operator>(const BigInt& a, const BigInt& b);
@@ -95,12 +105,7 @@ public:
 	friend bool operator==(const BigInt& a, const BigInt& b);
 	friend bool operator!=(const BigInt& a, const BigInt& b);
 
-	BigInt& operator&=(const BigInt& rhs);
-	BigInt& operator|=(const BigInt& rhs);
-	BigInt& operator^=(const BigInt& rhs);
-	BigInt& operator<<=(const BigInt& rhs);
-	BigInt& operator>>=(const BigInt& rhs);
-
+	/* BITWISE OPERATORS*/
 	friend BigInt operator~(const BigInt& a);
 	friend BigInt operator&(const BigInt& a, const BigInt& b);
 	friend BigInt operator|(const BigInt& a, const BigInt& b);
@@ -108,8 +113,7 @@ public:
 	friend BigInt operator<<(const BigInt& a, const BigInt& b);
 	friend BigInt operator>>(const BigInt& a, const BigInt& b);
 
-	friend BigInt pow(const BigInt&, const BigInt&);
-
+	/* OUT OPERATOR */
 	friend std::ostream& operator<<(std::ostream& os, const BigInt& value);
 
 	/* ==== UTILITIES ==== */
@@ -120,4 +124,7 @@ public:
 	};
 	ComparationResult AbsCompareWith(const BigInt& Other) const;
 	ComparationResult CompareWith(const BigInt& Other) const;
+
+	bool isOdd() const;
+	bool isEven() const;
 };
