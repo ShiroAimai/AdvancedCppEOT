@@ -42,10 +42,20 @@ private:
 	void Sum(const BigInt& Other);
 	/*Sub other from this, the underlying impl is a sum between a positive and a negative value*/
 	void Sub(const BigInt& Other);
-	/*Divide this for other*/
-	BigInt Divide(const BigInt& Other);
+	/*Multiply this for other*/
+	void Multiply(const BigInt& Other);
+	/*Classic multiply digit by digit. O(n^2)*/
+	BigInt NaiveMultiply(const BigInt& lhs, const BigInt& rhs);
+	/*Karatsuba alg version. O(n^1.59)*/
+	BigInt KaratsubaMultiply(BigInt lhs, BigInt rhs);
+	/*Divide this for other. Returns module of the division*/
+	BigInt Divide(const BigInt& rhs);
 	/*pair formed by division result and module*/
-	std::pair <BigInt, BigInt> DivideNaiveImpl(const BigInt& Other);
+	std::pair <BigInt, BigInt> DivideNaiveImpl(const BigInt& Other) const;
+	/*long divide. Returns division result and module*/
+	std::pair <BigInt, BigInt> DivideLongImpl(const BigInt& Other) const;
+	/*fast divide. Returns division result and module*/
+	std::pair <BigInt, BigInt> DivideFastImpl(const BigInt& Other) const;
 	/* get minimum number of bits needed to hold this value*/
 	size_t GetBits() const;
 	bool GetBitValueAt(size_t index) const;

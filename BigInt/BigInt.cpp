@@ -6,6 +6,7 @@
 #include <inttypes.h>
 #include <cassert>
 #include <vector>
+#include <bitset>
 
 using std::cout;
 using std::endl;
@@ -40,6 +41,20 @@ namespace
 	bool IsAllNumbers(const std::string& Value)
 	{
 		return !Value.empty() && std::find_if(Value.begin(), Value.end(), [](unsigned char c) { return !std::isdigit(c); }) == Value.end();
+	}
+
+	//repppresentation that maintains leading zeroes
+	std::string ToStringFormatted(uint64_t num)
+	{
+		constexpr uint64_t maxzeroes = max_digits() - 1;
+		std::string format = "%0";
+		format.append(std::to_string(maxzeroes));
+		format.append(PRIu64);
+
+		char buffer[maxzeroes + 1];
+		sprintf_s(buffer, maxzeroes + 1, format.c_str(), num);
+
+		return buffer;
 	}
 
 }
@@ -119,6 +134,85 @@ void BigInt::Sub(const BigInt& Other)
 	bIsNegative = (bIsNegative == IsGreaterOrEqualToOther); //false && false (was not negative and less than second op) or true && true (was negative and greater than second op)
 }
 
+void BigInt::Multiply(const BigInt& rhs)
+{
+	if (rhs == 0)
+	{
+		bIsNegative = false;
+		BIDigits newValue(1);
+		m_value = std::move(newValue);
+	}
+
+	//we have nothing to do
+	if (rhs == 1) return;
+
+	bIsNegative = (bIsNegative != rhs.bIsNegative);
+	
+	//BigInt res = NaiveMultiply(*this, rhs);
+	BigInt res = KaratsubaMultiply(*this, rhs);
+
+	m_value = std::move(res.m_value);
+}
+
+BigInt BigInt::NaiveMultiply(const BigInt& lhs, const BigInt& rhs)
+{
+	//check if the other deque contains more element than this
+	const size_t ResLength = lhs.m_value.size() + rhs.m_value.size() - 1;
+
+	BigInt result;
+	result.m_value.resize(ResLength);
+
+	DataSeed depositary(0);
+	//multiply each element of m_value times each element of rhs.m_value
+
+	for (size_t i = 0; i < lhs.m_value.size(); ++i)
+	{
+		const DoubleCapacityDataSeed firstOperand = lhs.m_value[i];
+
+		for (size_t j = 0; j < rhs.m_value.size(); ++j)
+		{
+			const DoubleCapacityDataSeed secondOperand = rhs.m_value[j];
+
+			UOperationResult opResult;
+			opResult.res = firstOperand * secondOperand + depositary;
+
+			result.m_value[i + j] += opResult.GetLowerHalf();
+			depositary = opResult.GetHighHalf();
+		}
+	}
+
+	if (depositary > 0)
+	{
+		result.m_value.push_back(depositary); //add depositary as new element in deque
+	}
+
+	return result;
+}
+
+BigInt BigInt::KaratsubaMultiply(BigInt lhs, BigInt rhs)
+{
+	constexpr BigInt::DataSeed divisor = max_power10(); //max power representing an entry in list
+	//if operands value is less than divisor fallback on naive multiply
+	if(lhs <= divisor && rhs <= divisor)
+		return NaiveMultiply(lhs, rhs);
+	//pair division result and module
+	std::pair<BigInt, BigInt> x = lhs.DivideNaiveImpl(divisor);
+	std::pair<BigInt, BigInt> y = rhs.DivideNaiveImpl(divisor);
+
+	BigInt x0 = x.second;
+	BigInt x1 = x.first;
+
+	BigInt y0 = y.second;
+	BigInt y1 = y.first;
+
+	BigInt z0 = KaratsubaMultiply(x0, y0); //recursively multiply modules
+	BigInt z2 = KaratsubaMultiply(x1, y1);//recursively multiply divisions results
+	BigInt z1 = (KaratsubaMultiply(x1 + x0, y1 + y0) - z2) - z0;
+
+	//combine results
+	return KaratsubaMultiply((KaratsubaMultiply(z2, divisor) + z1), divisor) + z0;
+}
+
 BigInt BigInt::Divide(const BigInt& Other)
 {
 	assert(Other != 0);
@@ -165,7 +259,9 @@ BigInt BigInt::Divide(const BigInt& Other)
 		return res;
 	}
 
-	std::pair <BigInt, BigInt> res = DivideNaiveImpl(Other);
+	//std::pair <BigInt, BigInt> res = DivideNaiveImpl(Other);
+	//std::pair <BigInt, BigInt> res = DivideLongImpl(Other);
+	std::pair <BigInt, BigInt> res = DivideFastImpl(Other);
 
 	m_value = std::move(res.first.m_value);
 	bIsNegative = (bIsNegative != Other.bIsNegative);
@@ -173,7 +269,7 @@ BigInt BigInt::Divide(const BigInt& Other)
 	return res.second;
 }
 
-std::pair <BigInt, BigInt> BigInt::DivideNaiveImpl(const BigInt& Other)
+std::pair <BigInt, BigInt> BigInt::DivideNaiveImpl(const BigInt& Other)const 
 {
 	std::pair <BigInt, BigInt> qr(0, *this);
 
@@ -189,10 +285,55 @@ std::pair <BigInt, BigInt> BigInt::DivideNaiveImpl(const BigInt& Other)
 	return qr;
 }
 
+std::pair <BigInt, BigInt> BigInt::DivideLongImpl(const BigInt& Other) const
+{
+   std::pair <BigInt, BigInt> qr(0, *this);
+   BigInt divisor = Other; //ignore sign
+   BigInt adder = 1; //quotient step 
+   BigInt shift = qr.second.GetBits() - divisor.GetBits(); //difference in bits
+   divisor <<= shift; //shift divisor for bits difference in order to have a bits length equals to dividend
+   adder <<= shift; //shift also step
+ 
+   while (qr.second >= Other){ //while quote is greater or equal to original divisor then
+	   if (qr.second >= divisor) { //check also dividend is divisible for current shifted divisor
+		   qr.second -= divisor; //subtract current divisor from dividend
+		   qr.first |= adder; //increment quotient by step
+	   }
+	   //divide both values by two
+	   divisor >>= 1; 
+	   adder >>= 1;
+   }
+   return qr; 
+}
+
+std::pair <BigInt, BigInt> BigInt::DivideFastImpl(const BigInt& Other) const
+{
+	//quotient and module
+	std::pair <BigInt, BigInt> qr(0, 0); 
+	for (BIDigits::size_type x = GetBits(); x > 0; x--) {
+		//shift left by one in order to process next element in list
+		//multiply elements by 2
+		qr.first <<= 1;
+		qr.second <<= 1;
+		
+		//check bit at position x - 1 
+		if (GetBitValueAt(x - 1)) {
+			qr.second++; //if its a 1 increment module, consume bit in dividend
+		}
+
+		//if after the incrementation module is greater or equals to divisor 
+		if (qr.second >= Other) {
+			qr.second -= Other; //then subtract divisor from module
+			qr.first++; //Increment quotient
+		}
+	}
+	return qr;
+}
+
 size_t BigInt::GetBits() const
 {
 	size_t out = (m_value.empty() ? 0 : (m_value.size() - 1)) * (sizeof(DataSeed) * CHAR_BIT);
-	BigInt::DataSeed msb = m_value.empty() ? 0 : m_value[0];
+	DataSeed msb = m_value.empty() ? 0 : m_value.back();
 	while (msb) {
 		msb >>= 1;
 		out++;
@@ -204,10 +345,8 @@ size_t BigInt::GetBits() const
 bool BigInt::GetBitValueAt(size_t index) const
 {
 	static constexpr size_t bits = sizeof(DataSeed) * CHAR_BIT;
-	if (index >= GetBits()) { // if given index is larger than bits in this _value, return 0
-		return 0;
-	}
-	return (m_value[m_value.size() - (index / bits) - 1] >> (index % bits)) & 1;
+	DataSeed interestedValue = m_value[index / bits];
+	return (interestedValue >> index) & 1;
 }
 
 BigInt::BigInt() : m_value(1), bIsNegative(false) {}
@@ -332,38 +471,7 @@ BigInt& BigInt::operator-=(const BigInt& rhs)
 
 BigInt& BigInt::operator*=(const BigInt& rhs)
 {
-	bIsNegative = (bIsNegative != rhs.bIsNegative);
-
-	//check if the other deque contains more element than this
-	const size_t ResLength = m_value.size() + rhs.m_value.size() - 1;
-	BIDigits result(ResLength);
-
-	DataSeed depositary(0);
-	//multiply each element of m_value times each element of rhs.m_value
-
-	for (size_t i = 0; i < m_value.size(); ++i)
-	{
-		const DoubleCapacityDataSeed firstOperand = m_value[i];
-
-		for (size_t j = 0; j < rhs.m_value.size(); ++j)
-		{
-			const DoubleCapacityDataSeed secondOperand = rhs.m_value[j];
-
-			UOperationResult opResult;
-			opResult.res = firstOperand * secondOperand + depositary;
-
-			result[i + j] += opResult.GetLowerHalf();
-			depositary = opResult.GetHighHalf();
-		}
-	}
-
-	if (depositary > 0)
-	{
-		result.push_back(depositary); //add depositary as new element in deque
-	}
-
-	m_value = std::move(result);
-
+	Multiply(rhs);
 	return *this;
 }
 
@@ -709,7 +817,7 @@ std::ostream& operator<<(std::ostream& os, const BigInt& value)
 	while (a > divisor) //every iteration it returns the exact value in decimal of the head of m_value
 	{
 		const BigInt rest = a.Divide(divisor);
-		const std::string resultDigit = std::to_string(rest.m_value[0]);
+		const std::string resultDigit = ToStringFormatted(rest.m_value[0]);
 
 		result.push_back(resultDigit);
 	}

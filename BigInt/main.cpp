@@ -9,8 +9,10 @@ using std::endl;
 
 int main()
 {
-	BigInt b("-22222223333333");
-	BigInt::DoubleCapacityDataSeed res = (BigInt::DoubleCapacityDataSeed)b;
+	BigInt a("222222333333");
+	cout << a << endl;
+	BigInt b("121212121200");	
+	cout << b << endl;
 
-	cout << res;
+	cout << a / b;
 }
