@@ -52,9 +52,7 @@ private:
 	BigInt Divide(const BigInt& rhs);
 	/*pair formed by division result and module*/
 	std::pair <BigInt, BigInt> DivideNaiveImpl(const BigInt& Other) const;
-	/*long divide. Returns division result and module*/
-	std::pair <BigInt, BigInt> DivideLongImpl(const BigInt& Other) const;
-	/*fast divide. Returns division result and module*/
+	/*fast divide. Returns division result and module. It takes O(n) where n is the length of the bit occupied by dividend*/
 	std::pair <BigInt, BigInt> DivideFastImpl(const BigInt& Other) const;
 	/* get minimum number of bits needed to hold this value*/
 	size_t GetBits() const;

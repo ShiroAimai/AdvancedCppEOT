@@ -260,7 +260,6 @@ BigInt BigInt::Divide(const BigInt& Other)
 	}
 
 	//std::pair <BigInt, BigInt> res = DivideNaiveImpl(Other);
-	//std::pair <BigInt, BigInt> res = DivideLongImpl(Other);
 	std::pair <BigInt, BigInt> res = DivideFastImpl(Other);
 
 	m_value = std::move(res.first.m_value);
@@ -283,27 +282,6 @@ std::pair <BigInt, BigInt> BigInt::DivideNaiveImpl(const BigInt& Other)const
 	}
 
 	return qr;
-}
-
-std::pair <BigInt, BigInt> BigInt::DivideLongImpl(const BigInt& Other) const
-{
-   std::pair <BigInt, BigInt> qr(0, *this);
-   BigInt divisor = Other; //ignore sign
-   BigInt adder = 1; //quotient step 
-   BigInt shift = qr.second.GetBits() - divisor.GetBits(); //difference in bits
-   divisor <<= shift; //shift divisor for bits difference in order to have a bits length equals to dividend
-   adder <<= shift; //shift also step
- 
-   while (qr.second >= Other){ //while quote is greater or equal to original divisor then
-	   if (qr.second >= divisor) { //check also dividend is divisible for current shifted divisor
-		   qr.second -= divisor; //subtract current divisor from dividend
-		   qr.first |= adder; //increment quotient by step
-	   }
-	   //divide both values by two
-	   divisor >>= 1; 
-	   adder >>= 1;
-   }
-   return qr; 
 }
 
 std::pair <BigInt, BigInt> BigInt::DivideFastImpl(const BigInt& Other) const
