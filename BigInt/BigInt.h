@@ -44,10 +44,12 @@ private:
 	void Sub(const BigInt& Other);
 	/*Multiply this for other*/
 	void Multiply(const BigInt& Other);
-	/*Classic multiply digit by digit. O(n^2)*/
-	BigInt NaiveMultiply(const BigInt& lhs, const BigInt& rhs);
-	/*Karatsuba alg version. O(n^1.59)*/
-	BigInt KaratsubaMultiply(BigInt lhs, BigInt rhs);
+	/*Classic multiply digit by digit. O(n^2). Does not work for large values*/
+	//BigInt NaiveMultiply(const BigInt& lhs, const BigInt& rhs);
+	/**Based on classic multiply, simplified. Should be O(logn) but our <<= slow it down a bit*/
+	BigInt VariantPeasantMultiply(const BigInt& lhs, const BigInt& rhs);
+	/*Karatsuba alg version. O(n^1.59), Does not work, WIP*/
+	//BigInt KaratsubaMultiply(const BigInt& lhs, const BigInt& rhs);
 	/*Divide this for other. Returns module of the division*/
 	BigInt Divide(const BigInt& rhs);
 	/*pair formed by division result and module*/

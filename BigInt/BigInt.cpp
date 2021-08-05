@@ -147,14 +147,33 @@ void BigInt::Multiply(const BigInt& rhs)
 	if (rhs == 1) return;
 
 	bIsNegative = (bIsNegative != rhs.bIsNegative);
-	
-	//BigInt res = NaiveMultiply(*this, rhs);
-	BigInt res = KaratsubaMultiply(*this, rhs);
+
+	BigInt res = VariantPeasantMultiply(*this, rhs);
 
 	m_value = std::move(res.m_value);
 }
 
-BigInt BigInt::NaiveMultiply(const BigInt& lhs, const BigInt& rhs)
+/** Uses occupied bit of lhs to add multiplier, properly shifted, to result
+ * always sum rhs to result
+ * lhs is used only at bitwise level, no arithmetic is performed
+*/
+BigInt BigInt::VariantPeasantMultiply(const BigInt& lhs, const BigInt& rhs)
+{
+	BigInt Mutliplier = rhs;
+	BigInt sum = 0;
+	for (BigInt::BIDigits::size_type x = 0; x < lhs.GetBits(); x++) {
+		if (lhs.GetBitValueAt(x)) //check if lhs has a one in position x
+		{
+			//if lhs has a one sum current multiplier
+			sum += Mutliplier;
+		}
+
+		Mutliplier <<= 1; //multiply by 2
+	}
+	return sum;
+}
+
+/*BigInt BigInt::NaiveMultiply(const BigInt& lhs, const BigInt& rhs)
 {
 	//check if the other deque contains more element than this
 	const size_t ResLength = lhs.m_value.size() + rhs.m_value.size() - 1;
@@ -174,7 +193,7 @@ BigInt BigInt::NaiveMultiply(const BigInt& lhs, const BigInt& rhs)
 			const DoubleCapacityDataSeed secondOperand = rhs.m_value[j];
 
 			UOperationResult opResult;
-			opResult.res = firstOperand * secondOperand + depositary;
+			opResult.res = (firstOperand * secondOperand) + depositary;
 
 			result.m_value[i + j] += opResult.GetLowerHalf();
 			depositary = opResult.GetHighHalf();
@@ -187,17 +206,29 @@ BigInt BigInt::NaiveMultiply(const BigInt& lhs, const BigInt& rhs)
 	}
 
 	return result;
-}
+}*/
 
-BigInt BigInt::KaratsubaMultiply(BigInt lhs, BigInt rhs)
+/*BigInt BigInt::KaratsubaMultiply(const BigInt& lhs, const BigInt& rhs)
 {
-	constexpr BigInt::DataSeed divisor = max_power10(); //max power representing an entry in list
+	constexpr BigInt::DoubleCapacityDataSeed base = max_power10(); //base
 	//if operands value is less than divisor fallback on naive multiply
-	if(lhs <= divisor && rhs <= divisor)
-		return NaiveMultiply(lhs, rhs);
+
+	if (lhs <= base || rhs <= base)
+		return PeasantMultiply(lhs, rhs);
+
+	size_t DivisorMultiplier = std::min(lhs.m_value.size(), rhs.m_value.size()) / 2;
+	BigInt SizeDivisor = base;
+	if (DivisorMultiplier > 0)
+	{
+		for (size_t i = 0; i < DivisorMultiplier; ++i)
+		{
+			SizeDivisor = PeasantMultiply(SizeDivisor, base);
+		}
+	}
+
 	//pair division result and module
-	std::pair<BigInt, BigInt> x = lhs.DivideNaiveImpl(divisor);
-	std::pair<BigInt, BigInt> y = rhs.DivideNaiveImpl(divisor);
+	std::pair<BigInt, BigInt> x = lhs.DivideFastImpl(base);
+	std::pair<BigInt, BigInt> y = rhs.DivideFastImpl(base);
 
 	BigInt x0 = x.second;
 	BigInt x1 = x.first;
@@ -207,11 +238,24 @@ BigInt BigInt::KaratsubaMultiply(BigInt lhs, BigInt rhs)
 
 	BigInt z0 = KaratsubaMultiply(x0, y0); //recursively multiply modules
 	BigInt z2 = KaratsubaMultiply(x1, y1);//recursively multiply divisions results
-	BigInt z1 = (KaratsubaMultiply(x1 + x0, y1 + y0) - z2) - z0;
+	BigInt z1 = ((KaratsubaMultiply(x1 + x0, y1 + y0) - z2) - z0);
 
+	BigInt DoubledSizeDivisor = base;
+	if (DivisorMultiplier > 0)
+	{
+		for (size_t i = 0; i <(DivisorMultiplier * 2); ++i)
+		{
+			DoubledSizeDivisor = NaiveMultiply2(DoubledSizeDivisor, base);
+		}
+	}
+
+	BigInt resFirstPart = z2 * DoubledSizeDivisor;
+	BigInt resSecondPart = z1 * SizeDivisor;
 	//combine results
-	return KaratsubaMultiply((KaratsubaMultiply(z2, divisor) + z1), divisor) + z0;
-}
+	BigInt res = resFirstPart + resSecondPart + z0;
+
+	return res;
+}*/
 
 BigInt BigInt::Divide(const BigInt& Other)
 {
@@ -268,7 +312,7 @@ BigInt BigInt::Divide(const BigInt& Other)
 	return res.second;
 }
 
-std::pair <BigInt, BigInt> BigInt::DivideNaiveImpl(const BigInt& Other)const 
+std::pair <BigInt, BigInt> BigInt::DivideNaiveImpl(const BigInt& Other)const
 {
 	std::pair <BigInt, BigInt> qr(0, *this);
 
@@ -287,13 +331,13 @@ std::pair <BigInt, BigInt> BigInt::DivideNaiveImpl(const BigInt& Other)const
 std::pair <BigInt, BigInt> BigInt::DivideFastImpl(const BigInt& Other) const
 {
 	//quotient and module
-	std::pair <BigInt, BigInt> qr(0, 0); 
+	std::pair <BigInt, BigInt> qr(0, 0);
 	for (BIDigits::size_type x = GetBits(); x > 0; x--) {
 		//shift left by one in order to process next element in list
 		//multiply elements by 2
 		qr.first <<= 1;
 		qr.second <<= 1;
-		
+
 		//check bit at position x - 1 
 		if (GetBitValueAt(x - 1)) {
 			qr.second++; //if its a 1 increment module, consume bit in dividend
@@ -768,7 +812,7 @@ BigInt pow(const BigInt& base, const BigInt& exp)
 	BigInt _exp{ exp };
 	BigInt result{ 1 };
 
-	while (_exp != 0)
+	while (_exp > 0)
 	{
 		bool isOdd = _exp.m_value[0] & 1; //check if the lowest digit of exp is odd
 		if (isOdd)
@@ -777,7 +821,6 @@ BigInt pow(const BigInt& base, const BigInt& exp)
 		}
 
 		_exp >>= 1; //equivalent to dividing by two
-
 		_base *= _base; //accumulate base
 	}
 
@@ -809,7 +852,7 @@ std::ostream& operator<<(std::ostream& os, const BigInt& value)
 	}
 
 	std::reverse(result.begin(), result.end());
-	
+
 	for (size_t i = 0; i < result.size(); i++)
 	{
 		os << result[i];
