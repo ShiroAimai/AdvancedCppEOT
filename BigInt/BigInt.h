@@ -38,11 +38,11 @@ private:
 		DataSeed GetHighHalf() const;
 	};
 private:
-	/*Sum other to this, the underlying impl is a sum between two values with same sign*/
+	/*Sum other to this, the underlying impl is a sum between two values with same sign. Perform side effect on this*/
 	void Sum(const BigInt& Other);
-	/*Sub other from this, the underlying impl is a sum between a positive and a negative value*/
+	/*Sub other from this, the underlying impl is a sum between a positive and a negative value. Perform side effect on this*/
 	void Sub(const BigInt& Other);
-	/*Multiply this for other*/
+	/*Multiply this for other. Perform side effect on this*/
 	void Multiply(const BigInt& Other);
 	/*Classic multiply digit by digit. O(n^2). Does not work for large values*/
 	//BigInt NaiveMultiply(const BigInt& lhs, const BigInt& rhs);
@@ -50,7 +50,7 @@ private:
 	BigInt VariantPeasantMultiply(const BigInt& lhs, const BigInt& rhs);
 	/*Karatsuba alg version. O(n^1.59), Does not work, WIP*/
 	//BigInt KaratsubaMultiply(const BigInt& lhs, const BigInt& rhs);
-	/*Divide this for other. Returns module of the division*/
+	/*Divide this for other. Perform sideffect on this, returns module of the division*/
 	BigInt Divide(const BigInt& rhs);
 	/*pair formed by division result and module*/
 	std::pair <BigInt, BigInt> DivideNaiveImpl(const BigInt& Other) const;

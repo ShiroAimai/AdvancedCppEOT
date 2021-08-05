@@ -6,34 +6,33 @@
 #include <inttypes.h>
 #include <cassert>
 #include <vector>
-#include <bitset>
 
 using std::cout;
 using std::endl;
 
 namespace
 {
-	constexpr uint64_t max_power10_in_max_power2[] = { 0, 100, 10000, 10000000, 1000000000, 1000000000000, 100000000000000, 10000000000000000, 10000000000000000000 };
+	constexpr BigInt::DoubleCapacityDataSeed max_power10_in_max_power2[] = { 0, 100, 10000, 10000000, 1000000000, 1000000000000, 100000000000000, 10000000000000000, 10000000000000000000 };
 
-	constexpr uint64_t max_power10()
+	constexpr BigInt::DoubleCapacityDataSeed max_power10()
 	{
 		return max_power10_in_max_power2[sizeof(BigInt::DataSeed)];
 	}
 
-	template <uint64_t T>
+	template <BigInt::DoubleCapacityDataSeed T>
 	struct count_digits
 	{
-		static constexpr uint64_t value = 1 + count_digits<T / 10>::value;
+		static constexpr BigInt::DoubleCapacityDataSeed value = 1 + count_digits<T / 10>::value;
 
 	};
 
 	template <>
 	struct count_digits<0>
 	{
-		static constexpr uint64_t value = 0;
+		static constexpr BigInt::DoubleCapacityDataSeed value = 0;
 	};
 
-	constexpr uint64_t max_digits()
+	constexpr BigInt::DoubleCapacityDataSeed max_digits()
 	{
 		return count_digits<max_power10()>::value;
 	}
@@ -43,16 +42,17 @@ namespace
 		return !Value.empty() && std::find_if(Value.begin(), Value.end(), [](unsigned char c) { return !std::isdigit(c); }) == Value.end();
 	}
 
-	//repppresentation that maintains leading zeroes
-	std::string ToStringFormatted(uint64_t num)
+	//reppresentation that maintains leading zeroes
+	std::string ToStringFormatted(BigInt::DoubleCapacityDataSeed num)
 	{
-		constexpr uint64_t maxzeroes = max_digits() - 1;
+		constexpr BigInt::DoubleCapacityDataSeed baseDigits = max_digits();
+		
 		std::string format = "%0";
-		format.append(std::to_string(maxzeroes));
+		format.append(std::to_string(baseDigits - 1)); ///only zeroes
 		format.append(PRIu64);
 
-		char buffer[maxzeroes + 1];
-		sprintf_s(buffer, maxzeroes + 1, format.c_str(), num);
+		char buffer[baseDigits];
+		sprintf_s(buffer, baseDigits, format.c_str(), num);
 
 		return buffer;
 	}
@@ -101,7 +101,7 @@ void BigInt::Sub(const BigInt& Other)
 
 	SignedDoubleCapacityDataSeed depositary(0);
 
-	bool IsGreaterOrEqualToOther = *this >= Other;
+	bool IsGreaterOrEqualToOther = AbsCompareWith(Other) != ComparationResult::Less;
 
 	const SignedDoubleCapacityDataSeed firstOperandSign = IsGreaterOrEqualToOther ? +1 : -1;
 	const SignedDoubleCapacityDataSeed secondOperandSign = -firstOperandSign;
@@ -160,6 +160,7 @@ void BigInt::Multiply(const BigInt& rhs)
 BigInt BigInt::VariantPeasantMultiply(const BigInt& lhs, const BigInt& rhs)
 {
 	BigInt Mutliplier = rhs;
+	Mutliplier.bIsNegative = false; //make sure we consider only positive values, sign is checked outside
 	BigInt sum = 0;
 	for (BigInt::BIDigits::size_type x = 0; x < lhs.GetBits(); x++) {
 		if (lhs.GetBitValueAt(x)) //check if lhs has a one in position x
@@ -259,12 +260,13 @@ BigInt BigInt::VariantPeasantMultiply(const BigInt& lhs, const BigInt& rhs)
 
 BigInt BigInt::Divide(const BigInt& Other)
 {
-	assert(Other != 0);
+	assert(Other != 0); //manage division by 0
 
 	//check division for 1
-	if (Other == 1)
+	if (Other == 1 || Other == -1)
 	{
-		return BigInt(*this);
+		bIsNegative = bIsNegative != Other.bIsNegative;
+		return BigInt();
 	}
 
 	// 0/Other division
@@ -283,15 +285,13 @@ BigInt BigInt::Divide(const BigInt& Other)
 		bIsNegative = false;
 		BIDigits newValue(1);
 		m_value = std::move(newValue);
+		m_value[0] = 1;
 
-		BigInt res;
-		res.m_value[0] = 1;
-
-		return res;
+		return BigInt();
 	}
 
 	//if divisor is greater than this
-	if (*this < Other)
+	if (AbsCompareWith(Other) == ComparationResult::Less)
 	{
 		bIsNegative = false;
 		BIDigits newValue(1);
@@ -330,6 +330,8 @@ std::pair <BigInt, BigInt> BigInt::DivideNaiveImpl(const BigInt& Other)const
 
 std::pair <BigInt, BigInt> BigInt::DivideFastImpl(const BigInt& Other) const
 {
+	BigInt Divisor(Other);
+	Divisor.bIsNegative = false; //copy has to be positive, sign is evaluated outside, here we're just computing the value
 	//quotient and module
 	std::pair <BigInt, BigInt> qr(0, 0);
 	for (BIDigits::size_type x = GetBits(); x > 0; x--) {
@@ -344,8 +346,8 @@ std::pair <BigInt, BigInt> BigInt::DivideFastImpl(const BigInt& Other) const
 		}
 
 		//if after the incrementation module is greater or equals to divisor 
-		if (qr.second >= Other) {
-			qr.second -= Other; //then subtract divisor from module
+		if (qr.second >= Divisor) {
+			qr.second -= Divisor; //then subtract divisor from module
 			qr.first++; //Increment quotient
 		}
 	}
@@ -649,7 +651,17 @@ BigInt::ComparationResult BigInt::CompareWith(const BigInt& Other) const
 
 	assert(bIsNegative == Other.bIsNegative);
 
-	return AbsCompareWith(Other);
+	ComparationResult res = AbsCompareWith(Other);
+
+	//if they're both negative, means we have to invert the result because the closer a number is to 0 the greater it is
+	if(!bIsNegative) return res;
+
+	assert(bIsNegative);
+
+	if(res == ComparationResult::Greater) return ComparationResult::Less;
+	else if (res == ComparationResult::Less) return ComparationResult::Greater;
+
+	return res; //they're negative and equals
 }
 
 BigInt& BigInt::operator++()
@@ -829,10 +841,10 @@ BigInt pow(const BigInt& base, const BigInt& exp)
 
 std::ostream& operator<<(std::ostream& os, const BigInt& value)
 {
-	std::vector<std::string> result;
+	std::vector<std::string> out;
 
 	BigInt a{ value };
-	a.bIsNegative = false;
+	a.bIsNegative = false; // make positive to avoid undefined behavior in division
 
 	constexpr BigInt::DataSeed divisor = max_power10(); //divisor is used to "Pop" elements from left to right in m_value
 	while (a > divisor) //every iteration it returns the exact value in decimal of the head of m_value
@@ -840,22 +852,22 @@ std::ostream& operator<<(std::ostream& os, const BigInt& value)
 		const BigInt rest = a.Divide(divisor);
 		const std::string resultDigit = ToStringFormatted(rest.m_value[0]);
 
-		result.push_back(resultDigit);
+		out.push_back(resultDigit);
 	}
 
 	const std::string resultDigit = std::to_string(a.m_value[0]); //value remaining from original tail
-	result.push_back(resultDigit);
+	out.push_back(resultDigit);
 
 	if (value.bIsNegative)
 	{
-		result.push_back("-");
+		out.push_back("-");
 	}
 
-	std::reverse(result.begin(), result.end());
+	std::reverse(out.begin(), out.end());
 
-	for (size_t i = 0; i < result.size(); i++)
+	for (size_t i = 0; i < out.size(); i++)
 	{
-		os << result[i];
+		os << out[i];
 	}
 
 	return os;
