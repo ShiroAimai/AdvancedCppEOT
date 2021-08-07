@@ -47,7 +47,7 @@ private:
 	/*Classic multiply digit by digit. O(n^2). Does not work for large values*/
 	//BigInt NaiveMultiply(const BigInt& lhs, const BigInt& rhs);
 	/**Based on classic multiply, simplified. Should be O(logn) but our <<= slow it down a bit*/
-	BigInt VariantPeasantMultiply(const BigInt& lhs, const BigInt& rhs);
+	BigInt VariantPeasantMultiply(const BigInt& lhs, const BigInt& rhs) const;
 	/*Karatsuba alg version. O(n^1.59), Does not work, WIP*/
 	//BigInt KaratsubaMultiply(const BigInt& lhs, const BigInt& rhs);
 	/*Divide this for other. Perform sideffect on this, returns module of the division*/
@@ -102,12 +102,6 @@ public:
 	friend BigInt pow(const BigInt&, const BigInt&);
 
 	/*LOGICAL OPERATORS*/
-	BigInt& operator&=(const BigInt& rhs);
-	BigInt& operator|=(const BigInt& rhs);
-	BigInt& operator^=(const BigInt& rhs);
-	BigInt& operator<<=(const BigInt& rhs);
-	BigInt& operator>>=(const BigInt& rhs);
-
 	friend bool operator<(const BigInt& a, const BigInt& b);
 	friend bool operator<=(const BigInt& a, const BigInt& b);
 	friend bool operator>(const BigInt& a, const BigInt& b);
@@ -116,6 +110,12 @@ public:
 	friend bool operator!=(const BigInt& a, const BigInt& b);
 
 	/* BITWISE OPERATORS*/
+	BigInt& operator&=(const BigInt& rhs);
+	BigInt& operator|=(const BigInt& rhs);
+	BigInt& operator^=(const BigInt& rhs);
+	BigInt& operator<<=(const BigInt& rhs);
+	BigInt& operator>>=(const BigInt& rhs);
+
 	friend BigInt operator~(const BigInt& a);
 	friend BigInt operator&(const BigInt& a, const BigInt& b);
 	friend BigInt operator|(const BigInt& a, const BigInt& b);
@@ -127,6 +127,7 @@ public:
 	friend std::ostream& operator<<(std::ostream& os, const BigInt& value);
 
 	/* ==== UTILITIES ==== */
+
 	enum class ComparationResult {
 		Equals,
 		Greater,

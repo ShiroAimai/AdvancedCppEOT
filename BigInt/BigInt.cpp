@@ -157,7 +157,7 @@ void BigInt::Multiply(const BigInt& rhs)
  * always sum rhs to result
  * lhs is used only at bitwise level, no arithmetic is performed
 */
-BigInt BigInt::VariantPeasantMultiply(const BigInt& lhs, const BigInt& rhs)
+BigInt BigInt::VariantPeasantMultiply(const BigInt& lhs, const BigInt& rhs) const
 {
 	BigInt Mutliplier = rhs;
 	Mutliplier.bIsNegative = false; //make sure we consider only positive values, sign is checked outside
@@ -826,8 +826,7 @@ BigInt pow(const BigInt& base, const BigInt& exp)
 
 	while (_exp > 0)
 	{
-		bool isOdd = _exp.m_value[0] & 1; //check if the lowest digit of exp is odd
-		if (isOdd)
+		if (_exp.isOdd())
 		{
 			result *= _base; //apply accumulated base
 		}
@@ -875,7 +874,7 @@ std::ostream& operator<<(std::ostream& os, const BigInt& value)
 
 bool BigInt::isOdd() const
 {
-	return m_value[0] % 2;
+	return m_value[0] & 1;
 }
 
 bool BigInt::isEven() const
