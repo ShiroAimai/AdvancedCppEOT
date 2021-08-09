@@ -16,7 +16,7 @@ int main()
 		cout << "************ Sum A + B ************" << endl;
 		BigInt a("99999999999999");
 		cout << "A " << a << endl;
-		BigInt b("2");
+		BigInt b = 2;
 		cout << "B " << b << endl;;
 
 		BigInt c = a + b;
@@ -29,7 +29,7 @@ int main()
 
 		cout << "************ Sum A + -B ************" << endl;
 
-		a = BigInt("2");
+		a = 2;
 		cout << "A " << a << endl;
 		b = BigInt("-99999999999999");
 		cout << "B " << b << endl;
@@ -55,7 +55,7 @@ int main()
 
 		BigInt c = a - b;
 
-		BigInt result("0");
+		BigInt result = 0;
 
 		cout << "Result: \t" << c << endl;
 		cout << "Attended: \t" << result << endl;
@@ -127,7 +127,7 @@ int main()
 
 		a = BigInt("250333212");
 		cout << "A " << a << endl;
-		b = BigInt("1");
+		b = 1;
 		cout << "B " << b << endl;
 
 		c = a * b;
@@ -141,7 +141,7 @@ int main()
 
 		a = BigInt("-333225999413");
 		cout << "A " << a << endl;
-		b = BigInt("1");
+		b = 1;
 		cout << "B " << b << endl;
 
 		c = a * b;
@@ -158,14 +158,14 @@ int main()
 
 		cout << "************ Division A / B ************" << endl;
 
-		BigInt a("0");
+		BigInt a = 0;
 		cout << "A " << a << endl;
 		BigInt b("888666444222");
 		cout << "B " << b << endl;;
 
 		BigInt c = a / b;
 
-		BigInt result("0");
+		BigInt result = 0;
 
 		cout << "Result: \t" << c << endl;
 		cout << "Attended: \t" << result << endl;
@@ -187,14 +187,14 @@ int main()
 
 		cout << "************ Division Small A / Larger B ************" << endl;
 
-		a = BigInt("25");
+		a = 25;
 		cout << "A " << a << endl;
-		b = BigInt("500");
+		b = 500;
 		cout << "B " << b << endl;
 
 		c = a / b;
 
-		result = BigInt("0");
+		result = 0;
 		cout << "Result: \t" << c << endl;
 		cout << "Attended: \t" << result << endl;
 		assert(c == result);
@@ -203,7 +203,7 @@ int main()
 
 		a = BigInt("999752955823");
 		cout << "A " << a << endl;
-		b = BigInt("333");
+		b = 333;
 		cout << "B " << b << endl;
 
 		c = a / b;
@@ -222,7 +222,7 @@ int main()
 
 		c = a / b;
 
-		result = BigInt("1");
+		result = 1;
 		cout << "Result: \t" << c << endl;
 		cout << "Attended: \t" << result << endl;
 		assert(c == result);
@@ -245,7 +245,7 @@ int main()
 
 		a = BigInt("250333212");
 		cout << "A " << a << endl;
-		b = BigInt("1");
+		b = 1;
 		cout << "B " << b << endl;
 
 		c = a / b;
@@ -259,7 +259,7 @@ int main()
 
 		a = BigInt("250333212");
 		cout << "A " << a << endl;
-		b = BigInt("-1");
+		b = -1;
 		cout << "B " << b << endl;
 
 		c = a / b;
@@ -273,7 +273,7 @@ int main()
 
 		a = BigInt("-333225999413");
 		cout << "A " << a << endl;
-		b = BigInt("1");
+		b = 1;
 		cout << "B " << b << endl;
 
 		c = a / b;
@@ -290,7 +290,7 @@ int main()
 
 		c = a / a;
 
-		result = BigInt("1");
+		result = 1;
 		cout << "Result: \t" << c << endl;
 		cout << "Attended: \t" << result << endl;
 		assert(c == result);
@@ -301,7 +301,7 @@ int main()
 		
 		c = -a / -a;
 
-		result = BigInt("1");
+		result = 1;
 		cout << "Result: \t" << c << endl;
 		cout << "Attended: \t" << result << endl;
 		assert(c == result);
@@ -319,7 +319,7 @@ int main()
 
 	BigInt c = a % b;
 
-	BigInt result{ "12" };
+	BigInt result = 12;
 
 	cout << "Result: \t" << c << endl;
 	cout << "Attended: \t" << result << endl;
@@ -347,7 +347,7 @@ int main()
 		cout << "************ Pow A^B ************" << endl;
 		BigInt a("1024");
 		cout << "A " << a << endl;
-		BigInt b("10");
+		BigInt b = 10;
 		cout << "B " << b << endl;;
 
 		BigInt c = pow(a, b);
@@ -362,7 +362,7 @@ int main()
 
 		a = BigInt("250000000");
 		cout << "A " << a << endl;
-		b = BigInt("1");
+		b = 1;
 		cout << "B " << b << endl;
 
 		c = pow(a, b);
@@ -377,12 +377,12 @@ int main()
 
 		a = BigInt("250000000");
 		cout << "A " << a << endl;
-		b = BigInt();
+		b = 0;
 		cout << "B " << b << endl;
 
 		c = pow(a, b);
 
-		result = BigInt("1");
+		result = 1;
 
 		cout << "Result: \t" << c << endl;
 		cout << "Attended: \t" << result << endl;
@@ -397,7 +397,7 @@ int main()
 
 		BigInt a("1000000000000000");
 		cout << "A " << a << endl;
-		BigInt b("5");
+		BigInt b = 5;
 		cout << "B " << b << endl;;
 
 		BigInt c = a >> b;
@@ -411,7 +411,7 @@ int main()
 		cout << "************ Shift A >> 0 ************" << endl;
 
 		cout << "A " << a << endl;
-		b = BigInt();
+		b = 0;
 		cout << "B " << b << endl;
 
 		c = a >> b;
@@ -430,7 +430,7 @@ int main()
 
 		BigInt a("1000000000000000");
 		cout << "A " << a << endl;
-		BigInt b("1");
+		BigInt b = 1;
 		cout << "B " << b << endl;;
 
 		BigInt c = a << b;
@@ -444,7 +444,7 @@ int main()
 		cout << "************ Shift A << 0 ************" << endl;
 
 		cout << "A " << a << endl;
-		b = BigInt();
+		b = 0;
 		cout << "B " << b << endl;
 
 		c = a << b;

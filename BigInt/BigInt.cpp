@@ -381,6 +381,12 @@ BigInt::BigInt(SignedDataSeed Value) : m_value(1)
 	m_value[0] = bIsNegative ? -Value : Value;
 }
 
+BigInt::BigInt(DataSeed Value, bool Sign) : m_value(1)
+{
+	bIsNegative = Sign;
+	m_value[0] = Value;
+}
+
 BigInt::BigInt(const std::string& Value) : BigInt()
 {
 	if (Value.empty())
@@ -602,7 +608,7 @@ BigInt& BigInt::operator>>=(const BigInt& rhs)
 		//shift total size of CurrentShift
 		DataSeed CurrentShift = (ShiftTotal < MaxShiftForEntry) ? ShiftTotal.m_value[0] : MaxShiftForEntry;
 		DataSeed depositary = 0;
-		for (int i = m_value.size() - 1; i >= 0; --i)
+		for (long long i = m_value.size() - 1; i >= 0; --i)
 		{
 			UOperationResult opResult{ m_value[i] };
 
@@ -632,7 +638,7 @@ BigInt::ComparationResult BigInt::AbsCompareWith(const BigInt& Other) const
 
 	assert(m_value.size() == Other.m_value.size());
 
-	for (int index = m_value.size() - 1; index >= 0; index--)
+	for (long long index = m_value.size() - 1; index >= 0; index--)
 	{
 		if (m_value[index] == Other.m_value[index])
 			continue;
@@ -845,7 +851,7 @@ std::ostream& operator<<(std::ostream& os, const BigInt& value)
 	BigInt a{ value };
 	a.bIsNegative = false; // make positive to avoid undefined behavior in division
 
-	constexpr BigInt::DataSeed divisor = max_power10(); //divisor is used to "Pop" elements from left to right in m_value
+	constexpr BigInt::DoubleCapacityDataSeed divisor = max_power10(); //divisor is used to "Pop" elements from left to right in m_value
 	while (a > divisor) //every iteration it returns the exact value in decimal of the head of m_value
 	{
 		const BigInt rest = a.Divide(divisor);
