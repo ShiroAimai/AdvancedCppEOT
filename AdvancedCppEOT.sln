@@ -9,6 +9,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ShirosMemoryManager", "Shir
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BigInt", "BigInt\BigInt.vcxproj", "{76731BA9-5CFB-468C-9C44-2B138A73C6D1}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SList", "SList\SList.vcxproj", "{6537474E-D843-491A-AAF4-3F5D6EAF85B3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -41,6 +43,14 @@ Global
 		{76731BA9-5CFB-468C-9C44-2B138A73C6D1}.Release|x64.Build.0 = Release|x64
 		{76731BA9-5CFB-468C-9C44-2B138A73C6D1}.Release|x86.ActiveCfg = Release|Win32
 		{76731BA9-5CFB-468C-9C44-2B138A73C6D1}.Release|x86.Build.0 = Release|Win32
+		{6537474E-D843-491A-AAF4-3F5D6EAF85B3}.Debug|x64.ActiveCfg = Debug|x64
+		{6537474E-D843-491A-AAF4-3F5D6EAF85B3}.Debug|x64.Build.0 = Debug|x64
+		{6537474E-D843-491A-AAF4-3F5D6EAF85B3}.Debug|x86.ActiveCfg = Debug|Win32
+		{6537474E-D843-491A-AAF4-3F5D6EAF85B3}.Debug|x86.Build.0 = Debug|Win32
+		{6537474E-D843-491A-AAF4-3F5D6EAF85B3}.Release|x64.ActiveCfg = Release|x64
+		{6537474E-D843-491A-AAF4-3F5D6EAF85B3}.Release|x64.Build.0 = Release|x64
+		{6537474E-D843-491A-AAF4-3F5D6EAF85B3}.Release|x86.ActiveCfg = Release|Win32
+		{6537474E-D843-491A-AAF4-3F5D6EAF85B3}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
