@@ -3,6 +3,50 @@
 #include <algorithm>
 #include <cassert>
 
+#pragma region Node
+template<class T>
+SList<T>::Node::Node() : Next(nullptr) {}
+
+template<class T>
+SList<T>::Node::Node(value_type _info, Node* _Next) : info(_info), Next(_Next) {}
+
+template<class T>
+SList<T>::Node::~Node()
+{
+	if (Next)
+	{
+		delete Next;
+	}
+}
+#pragma endregion
+#pragma region Iterator
+template<class T>
+SList<T>::Iterator::Iterator(it_pointer ptr) : m_ptr(ptr) {}
+
+template<class T>
+SList<T>::reference SList<T>::Iterator::operator*() const {
+	return (*m_ptr).info;
+}
+
+template<class T>
+SList<T>::pointer SList<T>::Iterator::operator->() {
+	return &(m_ptr->info);
+}
+
+template<class T>
+SList<T>::Iterator& SList<T>::Iterator::operator++() {
+	m_ptr = m_ptr->Next;
+	return *this;
+}
+template<class T>
+SList<T>::Iterator SList<T>::Iterator::operator++(int) {
+	Iterator tmp = *this;
+	++(*this);
+	return tmp;
+}
+
+#pragma endregion
+
 template<class T>
 SList<T>::SList() 
 {

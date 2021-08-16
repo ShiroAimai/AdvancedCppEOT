@@ -22,15 +22,9 @@ private:
 		value_type info;
 		Node* Next;
 
-		Node() : Next(nullptr) {}
-		Node(value_type _info, Node* _Next) : info(_info), Next(_Next) {}
-		virtual ~Node()
-		{
-			if (Next)
-			{
-				delete Next;
-			}
-		}
+		Node();
+		Node(value_type _info, Node* _Next);
+		virtual ~Node();
 	};
 	
 	iterator before_head;
@@ -44,27 +38,15 @@ public:
 		using iterator_category = std::forward_iterator_tag;
 		using it_pointer = Node*;
 
-		Iterator(it_pointer ptr) : m_ptr(ptr) {}
+		Iterator(it_pointer ptr);
 
-		reference operator*() const { 
-			return (*m_ptr).info; 
-		}
-		
-		pointer operator->() {
-			return &(m_ptr->info); 
-		}
+		reference operator*() const;		
+		pointer operator->();
 
 		// Prefix increment
-		Iterator& operator++() { 
-			m_ptr = m_ptr->Next; 
-			return *this; 
-		}
+		Iterator& operator++();
 		// Postfix increment
-		Iterator operator++(int) {
-			Iterator tmp = *this; 
-			++(*this); 
-			return tmp; 
-		}
+		Iterator operator++(int);
 
 		friend inline bool operator== (const Iterator& a, const Iterator& b) { return a.m_ptr == b.m_ptr; };
 		friend inline bool operator!= (const Iterator& a, const Iterator& b) { return a.m_ptr != b.m_ptr; };
