@@ -15,7 +15,7 @@ public:
 	
 	struct Iterator;
 	using iterator = Iterator;
-	using const_iterator = iterator const;
+	using const_iterator = const iterator;
 
 private:
 	struct Node
@@ -84,7 +84,7 @@ public:
 	//MEMBER FUNCTIONS
 	SList& operator=(const SList& other);
 	SList& operator=(SList&& other);
-	//TODO SList& operator=(initializer_list<value_type> il);
+	SList& operator=(std::initializer_list<value_type> il);
 
 	//CAPACITY
 	bool empty() const noexcept;

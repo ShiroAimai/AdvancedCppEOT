@@ -55,7 +55,7 @@ typename SList<T>::pointer SList<T>::Iterator::operator->() {
 
 template<class T>
 typename SList<T>::Iterator& SList<T>::Iterator::operator++() {
-	if(m_ptr)
+	if (m_ptr)
 	{
 		m_ptr = m_ptr->Next;
 	}
@@ -76,7 +76,7 @@ const typename SList<T>::iterator SList<T>::tail(nullptr);
 template<class T>
 SList<T>::SList() : before_head(new Node())
 {
-	
+
 }
 
 template<class T>
@@ -149,8 +149,9 @@ typename SList<T>::iterator SList<T>::begin() noexcept
 template<class T>
 const typename SList<T>::iterator SList<T>::cbegin() const noexcept
 {
-	const_iterator cbegin = begin();
-	return cbegin;
+	iterator it = before_head;
+	++it;
+	return it;
 }
 
 template<class T>
@@ -176,19 +177,19 @@ typename SList<T>& SList<T>::operator=(const SList& other)
 
 		//copy the available elements from other in this
 		//if either other or this equals to end stop
-		for (; it != tail && oIt != other.end(); ++it, ++oIt)
+		for (; it != tail && oIt != other.cend(); ++it, ++oIt)
 		{
 			*it = *oIt;
 			lastUpdateIt = it;
 		}
 
 		//this has less elements than other, add the remainings in other
-		if (it == tail && oIt != other.end())
+		if (it == tail && oIt != other.cend())
 		{
-			insert_after(lastUpdateIt, oIt, other.end());
+			insert_after(lastUpdateIt, oIt, other.cend());
 		}
 		//this has more elems, delete the remainings in this
-		else if (it != tail && oIt == other.end()) 
+		else if (it != tail && oIt == other.cend())
 		{
 			erase_after(lastUpdateIt, tail);
 		}
@@ -203,6 +204,36 @@ typename SList<T>& SList<T>::operator=(SList&& other)
 	if (this != &other)
 	{
 		std::swap(before_head, other.before_head); //swap only heads
+	}
+
+	return *this;
+}
+
+template<class T>
+typename SList<T>& SList<T>::operator=(std::initializer_list<value_type> il)
+{
+
+	iterator it = begin();
+	iterator lastUpdateIt = before_head;
+	typename std::initializer_list<value_type>::iterator ilIt = il.begin();
+
+	//copy the available elements from other in this
+	//if either other or this equals to end stop
+	for (; it != tail && ilIt != il.end(); ++it, ++ilIt)
+	{
+		*it = *ilIt;
+		lastUpdateIt = it;
+	}
+
+	//this has less elements than other, add the remainings in other
+	if (it == tail && ilIt != il.end())
+	{
+		insert_after(lastUpdateIt, ilIt, il.end());
+	}
+	//this has more elems, delete the remainings in this
+	else if (it != tail && ilIt == il.end())
+	{
+		erase_after(lastUpdateIt, tail);
 	}
 
 	return *this;
@@ -298,7 +329,7 @@ typename SList<T>::iterator SList<T>::insert_after(const_iterator position, cons
 	iterator prevIt = position;
 	iterator nextIt = position;
 	++nextIt;
-	
+
 	Node* NewEl = new Node(val, nextIt.m_ptr);
 	prevIt.m_ptr->Next = NewEl;
 
@@ -361,11 +392,11 @@ typename SList<T>::iterator SList<T>::erase_after(const_iterator position)
 	iterator it = position;
 	++it;
 
-	if(it != tail)
+	if (it != tail)
 	{
 		prevIt.m_ptr->Next = it.m_ptr->Next;
 		Node* NodeToErase = it.m_ptr;
-		
+
 		++it;
 
 		NodeToErase->Next = nullptr;
@@ -378,16 +409,15 @@ typename SList<T>::iterator SList<T>::erase_after(const_iterator position)
 template<class T>
 typename SList<T>::iterator SList<T>::erase_after(const_iterator position, const_iterator last)
 {
-	iterator prevIt = position;
-	
-	for (; prevIt != last; ++prevIt)
+	iterator eraseResult = position;
+	for (; eraseResult != last;)
 	{
-		erase_after(prevIt);
+		eraseResult = erase_after(position);
 	}
 
-	assert(prevIt == last);
+	assert(eraseResult == last);
 
-	return prevIt;
+	return eraseResult;
 }
 
 template<class T>
@@ -408,7 +438,7 @@ template<class T>
 void SList<T>::resize(size_type n, const value_type& val)
 {
 	size_type list_size = 0;
-	
+
 	SList<T>::iterator it = begin();
 	SList<T>::iterator lastIt = before_head;
 	for (; it != tail && list_size < n; ++it)
@@ -432,7 +462,7 @@ void SList<T>::resize(size_type n, const value_type& val)
 template<class T>
 void SList<T>::clear() noexcept
 {
-	erase_after(before_head, tail);
+	erase_after(before_head, end());
 }
 
 template<class T>
@@ -446,7 +476,7 @@ void SList<T>::remove(const value_type& value)
 		{
 			//erase element after lastIt
 			//assign iterator to element after canceled element to it
-			it = erase_after(lastIt); 
+			it = erase_after(lastIt);
 		}
 		else {
 			lastIt = it;
@@ -480,15 +510,15 @@ template<class T>
 void SList<T>::reverse() noexcept
 {
 	iterator it = begin();
-	
-	if(it == tail) return; //there's nothing to reverse
+
+	if (it == tail) return; //there's nothing to reverse
 
 	iterator prevIt = it;
 	++it;
 	prevIt.m_ptr->Next = tail;
-	
-	if(it == tail) return; //it means the list is composed of only one element
-	
+
+	if (it == tail) return; //it means the list is composed of only one element
+
 	before_head.m_ptr->Next = nullptr;
 	iterator nextIt = it.m_ptr->Next;
 	for (; it != tail;)
@@ -496,7 +526,7 @@ void SList<T>::reverse() noexcept
 		it.m_ptr->Next = prevIt;
 		prevIt = it;
 		it = nextIt;
-		if(it != tail)
+		if (it != tail)
 		{
 			nextIt = it.m_ptr->Next;
 		}
@@ -518,7 +548,7 @@ void SList<T>::unique()
 		{
 			it = erase_after(lastIt);
 		}
-		else 
+		else
 		{
 			lastIt = it;
 			++it;
@@ -551,7 +581,7 @@ void SList<T>::unique(BinaryPredicate binary_pred)
 template<class T>
 void SList<T>::splice_after(const_iterator position, SList& other)
 {
-	if(this == &other) return; //splicing the same list
+	if (this == &other) return; //splicing the same list
 	Node* PrevNextElement = position.m_ptr->Next;
 	position.m_ptr->Next = other.before_head->Next; //attach other
 	other.before_head->Next = nullptr; //reset other
@@ -588,7 +618,7 @@ void SList<T>::splice_after(const_iterator position, SList& other, const_iterato
 {
 	Node* OtherElementToMove = i.m_ptr->Next;
 	Node* PrevNextElement = position.m_ptr->Next;
-	
+
 	if(OtherElementToMove)
 	{
 		position.m_ptr->Next = OtherElementToMove; //attach other element at i
