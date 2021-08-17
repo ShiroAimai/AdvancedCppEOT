@@ -24,22 +24,45 @@ template<class T>
 SList<T>::Iterator::Iterator(it_pointer ptr) : m_ptr(ptr) {}
 
 template<class T>
-SList<T>::reference SList<T>::Iterator::operator*() const {
+SList<T>::Iterator::Iterator(const Iterator& other) : m_ptr(other.m_ptr) {}
+
+template<class T>
+typename SList<T>::Iterator& SList<T>::Iterator::operator=(const SList<T>::Iterator& other)
+{
+	if (this != &other)
+	{
+		m_ptr = other.m_ptr;
+	}
+
+	return *this;
+}
+
+template<class T>
+void swap(typename SList<T>::Iterator& lhs, typename SList<T>::Iterator& rhs)
+{
+	std::swap(lhs.m_ptr, rhs.m_ptr);
+}
+
+template<class T>
+typename SList<T>::reference SList<T>::Iterator::operator*() const {
 	return (*m_ptr).info;
 }
 
 template<class T>
-SList<T>::pointer SList<T>::Iterator::operator->() {
+typename SList<T>::pointer SList<T>::Iterator::operator->() {
 	return &(m_ptr->info);
 }
 
 template<class T>
-SList<T>::Iterator& SList<T>::Iterator::operator++() {
-	m_ptr = m_ptr->Next;
+typename SList<T>::Iterator& SList<T>::Iterator::operator++() {
+	if(m_ptr)
+	{
+		m_ptr = m_ptr->Next;
+	}
 	return *this;
 }
 template<class T>
-SList<T>::Iterator SList<T>::Iterator::operator++(int) {
+typename SList<T>::Iterator SList<T>::Iterator::operator++(int) {
 	Iterator tmp = *this;
 	++(*this);
 	return tmp;
@@ -48,17 +71,20 @@ SList<T>::Iterator SList<T>::Iterator::operator++(int) {
 #pragma endregion
 
 template<class T>
-SList<T>::SList() 
+const typename SList<T>::iterator SList<T>::tail(nullptr);
+
+template<class T>
+SList<T>::SList() : before_head(new Node())
 {
-	before_head = Iterator(new Node());
+	
 }
 
 template<class T>
 SList<T>::~SList()
 {
-	if (!head) return;
+	if (before_head == tail) return;
 
-	delete head;
+	delete before_head.m_ptr;
 }
 
 template<class T>
@@ -82,32 +108,38 @@ SList<T>::SList(InputInteractor first, InputInteractor last) : SList()
 }
 
 template<class T>
+SList<T>::SList(std::initializer_list<SList<T>::value_type> il) : SList()
+{
+	insert_after(before_head, il);
+}
+
+template<class T>
 SList<T>::SList(const SList& list) : SList()
 {
 	insert_after(before_head, list.begin(), list.end());
 }
 
 template<class T>
-SList<T>::SList(SList&& list)
+SList<T>::SList(SList&& list) : before_head(nullptr)
 {
-	before_head = std::move(list.before_head);
-	other.before_head = SList<T>::tail;
+	std::swap(before_head, list.before_head);
+	list.before_head = tail;
 }
 
 template<class T>
-SList<T>::iterator SList<T>::before_begin() noexcept
-{
-	return before_head;
-}
-
-template<class T>
-SList<T>::const_iterator SList<T>::cbefore_begin() const noexcept
+typename SList<T>::iterator SList<T>::before_begin() noexcept
 {
 	return before_head;
 }
 
 template<class T>
-SList<T>::iterator SList<T>::begin() noexcept
+const typename SList<T>::iterator SList<T>::cbefore_begin() const noexcept
+{
+	return before_head;
+}
+
+template<class T>
+typename SList<T>::iterator SList<T>::begin() noexcept
 {
 	iterator begin = before_head;
 	++begin;
@@ -115,26 +147,26 @@ SList<T>::iterator SList<T>::begin() noexcept
 }
 
 template<class T>
-SList<T>::const_iterator SList<T>::cbegin() const noexcept
+const typename SList<T>::iterator SList<T>::cbegin() const noexcept
 {
 	const_iterator cbegin = begin();
 	return cbegin;
 }
 
 template<class T>
-SList<T>::iterator SList<T>::end() noexcept
+typename SList<T>::iterator SList<T>::end() noexcept
 {
 	return tail;
 }
 
 template<class T>
-SList<T>::const_iterator SList<T>::cend() const noexcept
+const typename SList<T>::iterator SList<T>::cend() const noexcept
 {
 	return tail;
 }
 
 template<class T>
-SList<T>& SList<T>::operator=(const SList<T>& other)
+typename SList<T>& SList<T>::operator=(const SList& other)
 {
 	if (this != &other)
 	{
@@ -166,7 +198,7 @@ SList<T>& SList<T>::operator=(const SList<T>& other)
 }
 
 template<class T>
-SList<T>& SList<T>::operator=(SList<T>&& other)
+typename SList<T>& SList<T>::operator=(SList&& other)
 {
 	if (this != &other)
 	{
@@ -185,14 +217,14 @@ bool SList<T>::empty() const noexcept
 }
 
 template<class T>
-SList<T>::size_type SList<T>::max_size() const noexcept
+typename SList<T>::size_type SList<T>::max_size() const noexcept
 {
 	//total_size / el_size;
 	return std::numeric_limits<SList<T>::size_type>::max() / sizeof(SList<T>::Node);
 }
 
-template<class T>
-SList<T>::reference SList<T>::front()
+template<typename T>
+typename SList<T>::reference SList<T>::front()
 {
 	iterator it = before_head;
 	++it;
@@ -200,7 +232,7 @@ SList<T>::reference SList<T>::front()
 }
 
 template<class T>
-SList<T>::const_reference SList<T>::front() const
+typename SList<T>::const_reference SList<T>::front() const
 {
 	iterator it = before_head;
 	++it;
@@ -223,15 +255,21 @@ void SList<T>::assign(size_type n, const value_type& val)
 }
 
 template<class T>
+void SList<T>::assign(std::initializer_list<value_type> il)
+{
+	assign(il.begin(), il.end());
+}
+
+template<class T>
 template<class... Args>
 void SList<T>::emplace_front(Args&&... args)
 {
-	insert_after(before_head, T(std::forward<Args>(args)...))
+	insert_after(before_head, T(std::forward<Args>(args)...));
 }
 
 template<class T>
 template <class... Args>
-SList<T>::iterator SList<T>::emplace_after(const_iterator position, Args&&... args)
+typename SList<T>::iterator SList<T>::emplace_after(const_iterator position, Args&&... args)
 {
 	return insert_after(position, T(std::forward<Args>(args)...));
 }
@@ -255,7 +293,7 @@ void SList<T>::pop_front()
 }
 
 template<class T>
-SList<T>::iterator SList<T>::insert_after(const_iterator position, const value_type& val)
+typename SList<T>::iterator SList<T>::insert_after(const_iterator position, const value_type& val)
 {
 	iterator prevIt = position;
 	iterator nextIt = position;
@@ -268,7 +306,7 @@ SList<T>::iterator SList<T>::insert_after(const_iterator position, const value_t
 }
 
 template<class T>
-SList<T>::iterator SList<T>::insert_after(const_iterator position, value_type&& val)
+typename SList<T>::iterator SList<T>::insert_after(const_iterator position, value_type&& val)
 {
 	iterator prevIt = position;
 	iterator nextIt = position;
@@ -284,7 +322,7 @@ SList<T>::iterator SList<T>::insert_after(const_iterator position, value_type&& 
 }
 
 template<class T>
-SList<T>::iterator SList<T>::insert_after(const_iterator position, size_type n, const value_type& val)
+typename SList<T>::iterator SList<T>::insert_after(const_iterator position, size_type n, const value_type& val)
 {
 	iterator prevIt = position;
 
@@ -298,20 +336,26 @@ SList<T>::iterator SList<T>::insert_after(const_iterator position, size_type n, 
 
 template<class T>
 template <class InputIterator>
-SList<T>::iterator SList<T>::insert_after(const_iterator position, InputIterator first, InputIterator last)
+typename SList<T>::iterator SList<T>::insert_after(const_iterator position, InputIterator first, InputIterator last)
 {
 	iterator prevIt = position;
 
-	for (iterator startIt = first; first != last; ++first. ++prevIt)
+	for (; first != last; ++first, ++prevIt)
 	{
-		insert_after(prevIt, *startIt);
+		insert_after(prevIt, *first);
 	}
 
 	return prevIt;
 }
 
 template<class T>
-SList<T>::iterator SList<T>::erase_after(const_iterator position)
+typename SList<T>::iterator SList<T>::insert_after(const_iterator position, std::initializer_list<value_type> il)
+{
+	return insert_after(position, il.begin(), il.end());
+}
+
+template<class T>
+typename SList<T>::iterator SList<T>::erase_after(const_iterator position)
 {
 	iterator prevIt = position;
 	iterator it = position;
@@ -332,7 +376,7 @@ SList<T>::iterator SList<T>::erase_after(const_iterator position)
 }
 
 template<class T>
-SList<T>::iterator SList<T>::erase_after(const_iterator position, const_iterator last)
+typename SList<T>::iterator SList<T>::erase_after(const_iterator position, const_iterator last)
 {
 	iterator prevIt = position;
 	
@@ -347,21 +391,9 @@ SList<T>::iterator SList<T>::erase_after(const_iterator position, const_iterator
 }
 
 template<class T>
-void SList<T>::swap(SList<T>& other)
+void SList<T>::swap(SList& other)
 {
 	std::swap(before_head, other.before_head);
-}
-
-template<class T>
-SList<T>::size_type SList<T>::size() const
-{
-	size_type list_size = 0;
-	for (SList<T>::iterator it = begin(); it != tail; ++it)
-	{
-		++list_size;
-	}
-	
-	return list_size;
 }
 
 template<class T>
@@ -517,14 +549,102 @@ void SList<T>::unique(BinaryPredicate binary_pred)
 }
 
 template<class T>
+void SList<T>::splice_after(const_iterator position, SList& other)
+{
+	if(this == &other) return; //splicing the same list
+	Node* PrevNextElement = position.m_ptr->Next;
+	position.m_ptr->Next = other.before_head->Next; //attach other
+	other.before_head->Next = nullptr; //reset other
+
+	iterator it = position;
+	while (it.m_ptr->Next != nullptr)
+	{
+		++it;
+	}
+
+	it.m_ptr->Next = PrevNextElement;
+}
+
+template<class T>
+void SList<T>::splice_after(const_iterator position, SList&& other)
+{
+	if (this == &other) return; //splicing the same list
+	Node* PrevNextElement = position.m_ptr->Next;
+	position.m_ptr->Next = std::move(other.before_head->Next); //moving other
+	other.before_head->Next = nullptr; //reset other after move
+
+	iterator it = position;
+	while (it.m_ptr->Next != nullptr)
+	{
+		++it;
+	}
+
+	it.m_ptr->Next = PrevNextElement;
+}
+
+/*
+template<class T>
+void SList<T>::splice_after(const_iterator position, SList& other, const_iterator i)
+{
+	Node* OtherElementToMove = i.m_ptr->Next;
+	Node* PrevNextElement = position.m_ptr->Next;
+	
+	if(OtherElementToMove)
+	{
+		position.m_ptr->Next = OtherElementToMove; //attach other element at i
+		i.m_ptr->Next = OtherElementToMove->Next;
+		OtherElementToMove->Next = PrevNextElement;
+	}
+	else
+	{
+		i.m_ptr->Next = nullptr; //if OtherElementToMove was the last element in other, then i is the new last element
+	}
+}
+
+template<class T>
+void SList<T>::splice_after(const_iterator position, SList&& other, const_iterator i)
+{
+	Node* OtherElementToMove = i.m_ptr->Next;
+	Node* PrevNextElement = position.m_ptr->Next;
+
+	if (OtherElementToMove)
+	{
+		position.m_ptr->Next = OtherElementToMove; //attach other element at i
+		i.m_ptr->Next = OtherElementToMove->Next;
+		OtherElementToMove->Next = PrevNextElement;
+	}
+	else
+	{
+		i.m_ptr->Next = nullptr; //if OtherElementToMove was the last element in other, then i is the new last element
+	}
+}
+
+template<class T>
+void SList<T>::splice_after(const_iterator position, SList& other, const_iterator first, const_iterator last);
+template<class T>
+void SList<T>::splice_after(const_iterator position, SList&& other, const_iterator first, const_iterator last);
+
+template<class T>
 void SList<T>::sort()
 {
-
+	//TODO
 }
 
 template<class T>
 template<class Comparator>
 void SList<T>::sort(Comparator comp)
 {
-
+	//TODO
 }
+
+
+template<class T>
+void SList<T>::merge(SList& other);
+template<class T>
+void SList<T>::merge(SList&& other);
+template<class T>
+template<class Comparator>
+void SList<T>::merge(SList& other, Comparator comp);
+template<class T>
+template<class Comparator>
+void SList<T>::merge(SList&& other, Comparator comp);*/

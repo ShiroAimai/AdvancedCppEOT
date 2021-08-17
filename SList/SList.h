@@ -15,7 +15,8 @@ public:
 	
 	struct Iterator;
 	using iterator = Iterator;
-	using const_iterator = const Iterator;
+	using const_iterator = iterator const;
+
 private:
 	struct Node
 	{
@@ -28,18 +29,21 @@ private:
 	};
 	
 	iterator before_head;
-	static constexpr const_iterator tail = nullptr;
+	static const_iterator tail;
 
-	size_type size() const;
 public:
 	struct Iterator {
-		template<class T>
-		friend class SList<T>;
+		friend class SList;
+
 		using iterator_category = std::forward_iterator_tag;
 		using it_pointer = Node*;
 
 		Iterator(it_pointer ptr);
+		Iterator(const Iterator& other);
+		Iterator& operator=(const Iterator& other);
 
+		friend void swap(Iterator& lhs, Iterator& rhs);
+		
 		reference operator*() const;		
 		pointer operator->();
 
@@ -61,8 +65,8 @@ public:
 	template<class InputInteractor>
 	SList(InputInteractor first, InputInteractor last);
 	SList(const SList& list);
-	SList(SList&& list):
-	//SList(initializer_list<value_type> il):
+	SList(SList&& list);
+	SList(std::initializer_list<value_type> il);
 	
 	//DESTRUCTOR
 	virtual ~SList();
@@ -94,7 +98,7 @@ public:
 	template<class InputIterator>
 	void assign(InputIterator first, InputIterator last);
 	void assign(size_type n, const value_type& val);
-	//void assign(initializer_list<value_type> il);
+	void assign(std::initializer_list<value_type> il);
 
 	template<class... Args>
 	void emplace_front(Args&&... args);
@@ -111,7 +115,7 @@ public:
 	iterator insert_after(const_iterator position, size_type n, const value_type& val);
 	template <class InputIterator>
 	iterator insert_after(const_iterator position, InputIterator first, InputIterator last);
-	//iterator insert_after(const_iterator position, initializer_list<value_type> il);
+	iterator insert_after(const_iterator position, std::initializer_list<value_type> il);
 
 	iterator erase_after(const_iterator position);
 	iterator erase_after(const_iterator position, const_iterator last);
@@ -133,17 +137,28 @@ public:
 	void unique();
 	template<class BinaryPredicate>
 	void unique(BinaryPredicate binary_pred);
+	
+	
+	void splice_after(const_iterator position, SList& other);
+	void splice_after(const_iterator position, SList&& other);
+	
+	//TODO void splice_after(const_iterator position, SList& other, const_iterator i);
+	//TODO void splice_after(const_iterator position, SList&& other, const_iterator i);
 
-	void sort();
+	//TODO void splice_after(const_iterator position, SList& other, const_iterator first, const_iterator last);
+	//TODO void splice_after(const_iterator position, SList&& other, const_iterator first, const_iterator last);
+
+	//TODO
+	/*void sort();
 	template<class Comparator>
-	void sort(Comparator comp);
+	void sort(Comparator comp);*/
 
-	void merge(SList& other);
+	/*void merge(SList& other);
 	void merge(SList&& other);
 	template<class Comparator>
 	void merge(SList& other, Comparator comp);
 	template<class Comparator>
-	void merge(SList&& other, Comparator comp);
+	void merge(SList&& other, Comparator comp);*/
 };
 
 #include "SListImpl.h"
