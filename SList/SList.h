@@ -93,8 +93,8 @@ public:
 	explicit SList();
 	explicit SList(size_type n);
 	explicit SList(size_type n, const value_type& val);
-	template<class InputInteractor>
-	SList(InputInteractor first, InputInteractor last);
+	template<class InputIterator>
+	SList(InputIterator first, InputIterator last);
 	SList(const SList& list);
 	SList(SList&& list);
 	SList(std::initializer_list<value_type> il);

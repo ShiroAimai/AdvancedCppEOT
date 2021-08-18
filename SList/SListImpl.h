@@ -40,21 +40,20 @@ SList<T>::~SList()
 template<class T>
 SList<T>::SList(SList::size_type n) : SList()
 {
-	const value_type default();
-	insert_after(before_head, n, default);
+	insert_after(cbefore_begin(), n, value_type());
 }
 
 template<class T>
 SList<T>::SList(size_type n, const value_type& val) : SList()
 {
-	insert_after(before_head, n, val);
+	insert_after(cbefore_begin(), n, val);
 }
 
 template<class T>
-template<class InputInteractor>
-SList<T>::SList(InputInteractor first, InputInteractor last) : SList()
+template<class InputIterator>
+SList<T>::SList(InputIterator first, InputIterator last) : SList()
 {
-	insert_after(before_head, first, last);
+	insert_after(cbefore_begin(), first, last);
 }
 
 template<class T>
@@ -303,21 +302,18 @@ typename SList<T>::iterator SList<T>::insert_after(const_iterator position, valu
 template<class T>
 typename SList<T>::iterator SList<T>::insert_after(const_iterator position, size_type n, const value_type& val)
 {
-	iterator prevIt = position;
-
-	for (size_type i = 0; i < n; ++i, ++prevIt)
+	for (size_type i = 0; i < n; ++i, ++position)
 	{
-		insert_after(prevIt, val);
+		insert_after(position, val);
 	}
 
-	return prevIt;
+	return iterator(position.m_ptr);
 }
 
 template<class T>
 template <class InputIterator>
 typename SList<T>::iterator SList<T>::insert_after(const_iterator position, InputIterator first, InputIterator last)
 {
-
 	for (; first != last; ++first, ++position)
 	{
 		insert_after(position, *first);
