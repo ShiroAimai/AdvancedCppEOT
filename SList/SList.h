@@ -19,9 +19,15 @@ private:
 		value_type info;
 		Node* Next;
 
-		Node();
-		Node(value_type _info, Node* _Next);
-		virtual ~Node();
+		Node() : Next(nullptr) {};
+		Node(value_type _info, Node* _Next) : info(_info), Next(_Next) {};
+		virtual ~Node()
+		{
+			if (Next)
+			{
+				delete Next;
+			}
+		};
 	};
 
 public:
@@ -30,11 +36,15 @@ public:
 		friend class SList;
 
 		using iterator_category = std::forward_iterator_tag;
-		using it_pointer = typename std::conditional_t< IsConst, T const*, T*>;
-		using it_reference = typename std::conditional_t< IsConst, T const&, T&>;
+		using it_pointer = typename std::conditional_t< IsConst, value_type const*, value_type*>;
+		using it_reference = typename std::conditional_t< IsConst, value_type const&, value_type&>;
 
 		Iterator(Node* ptr) : m_ptr(ptr) {};
-		Iterator(const Iterator& other) : m_ptr(other.m_ptr) {};
+		Iterator(const Iterator<IsConst>& other) : m_ptr(other.m_ptr) {};
+		operator Iterator<true>() const { 
+			return Iterator<true>(m_ptr); 
+		};
+
 		Iterator& operator=(const Iterator& other) 
 		{
 			if (this != &other)

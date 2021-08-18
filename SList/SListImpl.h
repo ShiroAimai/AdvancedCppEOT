@@ -3,23 +3,6 @@
 #include <algorithm>
 #include <cassert>
 
-#pragma region Node
-template<class T>
-SList<T>::Node::Node() : Next(nullptr) {}
-
-template<class T>
-SList<T>::Node::Node(value_type _info, Node* _Next) : info(_info), Next(_Next) {}
-
-template<class T>
-SList<T>::Node::~Node()
-{
-	if (Next)
-	{
-		delete Next;
-	}
-}
-#pragma endregion
-
 template<class T>
 typename SList<T>::iterator SList<T>::tail(nullptr);
 
@@ -98,7 +81,7 @@ typename SList<T>::iterator SList<T>::begin() noexcept
 template<class T>
 typename SList<T>::const_iterator SList<T>::cbegin() const noexcept
 {
-	const_iterator cit(before_head.m_ptr);
+	const_iterator cit(before_head);
 	++cit;
 	return cit;
 }
@@ -112,7 +95,7 @@ typename SList<T>::iterator SList<T>::end() noexcept
 template<class T>
 typename SList<T>::const_iterator SList<T>::cend() const noexcept
 {
-	return const_iterator(tail.m_ptr);
+	return const_iterator(tail);
 }
 
 template<class T>
@@ -206,17 +189,13 @@ typename SList<T>::size_type SList<T>::max_size() const noexcept
 template<typename T>
 typename SList<T>::reference SList<T>::front()
 {
-	iterator it = before_head;
-	++it;
-	return *it;
+	return *begin();
 }
 
 template<class T>
 typename SList<T>::const_reference SList<T>::front() const
 {
-	iterator it = before_head;
-	++it;
-	return *it;
+	return *cbegin();
 }
 
 template<class T>
@@ -293,7 +272,7 @@ typename SList<T>::iterator SList<T>::insert_after(const_iterator position, valu
 	Node* NewEl = new Node();
 	NewEl->info = std::move(val);
 	NewEl->Next = position.m_ptr;
-
+	
 	prevIt.m_ptr->Next = NewEl;
 
 	return iterator(NewEl);
@@ -331,8 +310,8 @@ typename SList<T>::iterator SList<T>::insert_after(const_iterator position, std:
 template<class T>
 typename SList<T>::iterator SList<T>::erase_after(const_iterator position)
 {
-	iterator prevIt = position;
-	iterator it = position;
+	const_iterator prevIt = position;
+	const_iterator it = position;
 	++it;
 
 	if (it != tail)
@@ -346,13 +325,13 @@ typename SList<T>::iterator SList<T>::erase_after(const_iterator position)
 		delete NodeToErase;
 	}
 
-	return it;
+	return iterator(it.m_ptr);
 }
 
 template<class T>
 typename SList<T>::iterator SList<T>::erase_after(const_iterator position, const_iterator last)
 {
-	iterator eraseResult = position;
+	const_iterator eraseResult = position;
 	for (; eraseResult != last;)
 	{
 		eraseResult = erase_after(position);
@@ -360,7 +339,7 @@ typename SList<T>::iterator SList<T>::erase_after(const_iterator position, const
 
 	assert(eraseResult == last);
 
-	return eraseResult;
+	return iterator(eraseResult.m_ptr);
 }
 
 template<class T>
@@ -405,7 +384,7 @@ void SList<T>::resize(size_type n, const value_type& val)
 template<class T>
 void SList<T>::clear() noexcept
 {
-	erase_after(before_head, end());
+	erase_after(before_head, tail);
 }
 
 template<class T>
