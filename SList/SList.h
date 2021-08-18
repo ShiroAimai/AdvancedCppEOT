@@ -9,13 +9,9 @@ public:
 	using reference = value_type&;
 	using const_reference = const value_type&;
 	using pointer = value_type*;
-	using const_pointer = const pointer;
+	using const_pointer = const value_type*;
 	using size_type = std::size_t;
 	using difference_type = std::ptrdiff_t;
-	
-	struct Iterator;
-	using iterator = Iterator;
-	using const_iterator = const iterator;
 
 private:
 	struct Node
@@ -27,37 +23,72 @@ private:
 		Node(value_type _info, Node* _Next);
 		virtual ~Node();
 	};
-	
-	iterator before_head;
-	static const_iterator tail;
 
 public:
+	template<bool IsConst = false>
 	struct Iterator {
 		friend class SList;
 
 		using iterator_category = std::forward_iterator_tag;
-		using it_pointer = Node*;
+		using it_pointer = typename std::conditional_t< IsConst, T const*, T*>;
+		using it_reference = typename std::conditional_t< IsConst, T const&, T&>;
 
-		Iterator(it_pointer ptr);
-		Iterator(const Iterator& other);
-		Iterator& operator=(const Iterator& other);
+		Iterator(Node* ptr) : m_ptr(ptr) {};
+		Iterator(const Iterator& other) : m_ptr(other.m_ptr) {};
+		Iterator& operator=(const Iterator& other) 
+		{
+			if (this != &other)
+			{
+				m_ptr = other.m_ptr;
+			}
 
-		friend void swap(Iterator& lhs, Iterator& rhs);
-		
-		reference operator*() const;		
-		pointer operator->();
+			return *this;
+		}
+
+		friend void swap(Iterator& lhs, Iterator& rhs)
+		{
+			std::swap(lhs.m_ptr, rhs.m_ptr);
+		}
+
+		//USE SFINAE TO FILTER OPERATOR SIGNATURES
+		template< bool _Const = IsConst >
+		std::enable_if_t< _Const, it_reference > operator*() const { return (*m_ptr).info; };
+		template< bool _Const = IsConst >
+		std::enable_if_t< !_Const, it_reference > operator*() { return (*m_ptr).info; };
+		template< bool _Const = IsConst >
+		std::enable_if_t< _Const, it_pointer > operator->() const { return &(m_ptr->info); };
+		template< bool _Const = IsConst >
+		std::enable_if_t< !_Const, it_pointer > operator->() { return &(m_ptr->info); };
 
 		// Prefix increment
-		Iterator& operator++();
+		Iterator& operator++()
+		{
+			if (m_ptr)
+			{
+				m_ptr = m_ptr->Next;
+			}
+			return *this;
+		}
+
 		// Postfix increment
-		Iterator operator++(int);
+		Iterator operator++(int)
+		{
+			Iterator tmp = *this;
+			++(*this);
+			return tmp;
+		}
 
 		friend inline bool operator== (const Iterator& a, const Iterator& b) { return a.m_ptr == b.m_ptr; };
 		friend inline bool operator!= (const Iterator& a, const Iterator& b) { return a.m_ptr != b.m_ptr; };
 
 	private:
-		it_pointer m_ptr;
+		Node* m_ptr;
 	};
+
+	using iterator = Iterator<false>;
+	using const_iterator = Iterator<true>;
+
+public:
 
 	explicit SList();
 	explicit SList(size_type n);
@@ -67,7 +98,7 @@ public:
 	SList(const SList& list);
 	SList(SList&& list);
 	SList(std::initializer_list<value_type> il);
-	
+
 	//DESTRUCTOR
 	virtual ~SList();
 
@@ -121,7 +152,7 @@ public:
 	iterator erase_after(const_iterator position, const_iterator last);
 
 	void swap(SList& other);
-	
+
 	void resize(size_type n);
 	void resize(size_type n, const value_type& val);
 
@@ -133,15 +164,15 @@ public:
 	void remove_if(Predicate pred);
 
 	void reverse() noexcept;
-	
+
 	void unique();
 	template<class BinaryPredicate>
 	void unique(BinaryPredicate binary_pred);
-	
-	
+
+
 	void splice_after(const_iterator position, SList& other);
 	void splice_after(const_iterator position, SList&& other);
-	
+
 	//TODO void splice_after(const_iterator position, SList& other, const_iterator i);
 	//TODO void splice_after(const_iterator position, SList&& other, const_iterator i);
 
@@ -159,6 +190,11 @@ public:
 	void merge(SList& other, Comparator comp);
 	template<class Comparator>
 	void merge(SList&& other, Comparator comp);*/
+
+private:
+	iterator before_head;
+	static iterator tail;
+
 };
 
 #include "SListImpl.h"
