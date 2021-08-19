@@ -5,6 +5,23 @@
 using std::cout;
 using std::endl;
 
+//Custom data type for test purpose
+struct Vec3 {
+	float x, y, z;
+
+	Vec3() = default;
+	Vec3(float _x, float _y, float _z)
+		: x(_x), y(_y), z(_z)
+	{
+
+	}
+	friend inline bool operator== (const Vec3& a, const Vec3& b) 
+	{ 
+		return a.x == b.x && a.y == b.y && a.z == b.z;
+	};
+	friend inline bool operator!= (const Vec3& a, const Vec3& b) { return !(a == b); };
+};
+
 template <class ForwardIterator>
 void print(ForwardIterator begin, ForwardIterator end)
 {
@@ -336,6 +353,426 @@ int main()
 		}
 
 		assert(cit2 == l2.end() && ilIt == il.end());
+
+		cout << endl;
+	}
+	//EMPLACE FRONT
+	{
+		cout << "======== EMPLACE FRONT ========" << endl;
+
+		SList<Vec3> l;
+		l.emplace_front(1.f, 2.f, 3.f);
+		
+		cout << "Result: ";
+		for (SList<Vec3>::const_iterator cit = l.cbegin(); cit != l.cend(); ++cit)
+		{
+			cout << "x " << cit->x << " y " << cit->y << " z " << cit->z << endl;
+		}
+
+		SList<Vec3> expected((SList<Vec3>::size_type)1, Vec3(1.f, 2.f, 3.f));
+		cout << "Expected Result: ";
+		for (SList<Vec3>::const_iterator cit = expected.cbegin(); cit != expected.cend(); ++cit)
+		{
+			cout << "x " << cit->x << " y " << cit->y << " z " << cit->z << endl;
+		}
+
+		SList<Vec3>::const_iterator cit = l.cbegin();
+		SList<Vec3>::const_iterator citExpected = expected.cbegin();
+		for (; cit != l.cend() && citExpected != expected.cend(); ++cit, ++citExpected)
+		{
+			assert(*cit == *citExpected);
+		}
+
+		assert(cit == l.cend() && citExpected == expected.end());
+
+		cout << endl;
+	}
+	//EMPLACE AFTER POSITION
+	{
+		cout << "======== EMPLACE AFTER POSITION ========" << endl;
+
+		SList<Vec3> l { Vec3(), Vec3(2.f, 2.f, 2.f)};
+		
+		SList<Vec3>::const_iterator it = l.cbegin();
+
+		l.emplace_after(it, 1.f, 2.f, 3.f);
+
+		cout << "Result: " << endl;;
+		for (SList<Vec3>::const_iterator cit = l.cbegin(); cit != l.cend(); ++cit)
+		{
+			cout << "x " << cit->x << " y " << cit->y << " z " << cit->z << endl;
+		}
+
+		SList<Vec3> expected { Vec3(), Vec3(1.f, 2.f, 3.f), Vec3(2.f, 2.f, 2.f) };
+		cout << "Expected Result: " << endl;
+		for (SList<Vec3>::const_iterator cit = expected.cbegin(); cit != expected.cend(); ++cit)
+		{
+			cout << "x " << cit->x << " y " << cit->y << " z " << cit->z << endl;
+		}
+
+		SList<Vec3>::const_iterator cit = l.cbegin();
+		SList<Vec3>::const_iterator citExpected = expected.cbegin();
+		for (; cit != l.cend() && citExpected != expected.cend(); ++cit, ++citExpected)
+		{
+			assert(*cit == *citExpected);
+		}
+
+		assert(cit == l.cend() && citExpected == expected.end());
+
+		cout << endl;
+	}
+	//PUSH FRONT CONST VAL&
+	{
+		cout << "======== PUSH FRONT const val& ========" << endl;
+		SList<int> l;
+
+		int x = 0, y = 0, z = 1;
+		
+		l.push_front(x);
+		l.push_front(y);
+		l.push_front(z);
+
+		cout << "Result: ";
+		print(l.cbegin(), l.cend());
+
+		SList<int> expected {1, 0, 0};
+
+		cout << "Expected Result: ";
+		print(expected.cbegin(), expected.cend());
+
+		SList<int>::const_iterator cit = l.cbegin();
+		SList<int>::const_iterator citExpected = expected.cbegin();
+
+		for (; cit != l.cend() && citExpected != expected.cend(); ++cit, ++citExpected)
+		{
+			assert(*cit == *citExpected);
+		}
+
+		assert(cit == l.cend() && citExpected == expected.cend());
+
+		cout << endl;
+	}
+	//PUSH FRONT VAL&&
+	{
+		cout << "======== PUSH FRONT val&& ========" << endl;
+		SList<int> l;
+
+		l.push_front(25);
+		l.push_front(13);
+		l.push_front(12);
+
+		cout << "Result: ";
+		print(l.cbegin(), l.cend());
+
+		SList<int> expected{ 12, 13, 25 };
+
+		cout << "Expected Result: ";
+		print(expected.cbegin(), expected.cend());
+
+		SList<int>::const_iterator cit = l.cbegin();
+		SList<int>::const_iterator citExpected = expected.cbegin();
+
+		for (; cit != l.cend() && citExpected != expected.cend(); ++cit, ++citExpected)
+		{
+			assert(*cit == *citExpected);
+		}
+
+		assert(cit == l.cend() && citExpected == expected.cend());
+
+		l.clear();
+		expected.clear();
+		
+		int x = 0, y = 0, z = 1;
+
+		l.push_front(std::move(x));
+		l.push_front(std::move(y));
+		l.push_front(std::move(z));
+
+		cout << "Result: ";
+		print(l.cbegin(), l.cend());
+
+		expected.assign({ 1, 0, 0 });
+
+		cout << "Expected Result: ";
+		print(expected.cbegin(), expected.cend());
+
+		cit = l.cbegin();
+		citExpected = expected.cbegin();
+
+		for (; cit != l.cend() && citExpected != expected.cend(); ++cit, ++citExpected)
+		{
+			assert(*cit == *citExpected);
+		}
+
+		assert(cit == l.cend() && citExpected == expected.cend());
+		cout << endl;
+	}
+	//SWAP
+	{
+		cout << "======== SWAP ========" << endl;
+
+		SList<int> l1 {1, 2, 3, 4, 5};
+		cout<<"L1 ";
+		print(l1.cbegin(), l1.cend());
+		SList<int> l2 {6, 7, 8, 9, 10};
+		cout << "L2 ";
+		print(l2.cbegin(), l2.cend());
+		
+		l1.swap(l2);
+
+		cout << "Result: " << endl;
+		cout << "L1 ";
+		print(l1.cbegin(), l1.cend());
+		cout << "L2 ";
+		print(l2.cbegin(), l2.cend());
+
+		SList<int> expected1{ 6, 7, 8, 9, 10 };
+		SList<int> expected2{ 1, 2, 3, 4, 5 };
+
+		cout << "Expected Result: " << endl;
+		cout << "L1 ";
+		print(expected1.cbegin(), expected1.cend());
+		cout << "L2 ";
+		print(expected2.cbegin(), expected2.cend());
+
+		SList<int>::const_iterator cit1 = l1.cbegin();
+		SList<int>::const_iterator cit1Expected = expected1.cbegin();
+
+		for (; cit1 != l1.cend() && cit1Expected != expected1.cend(); ++cit1, ++cit1Expected)
+		{
+			assert(*cit1 == *cit1Expected);
+		}
+
+		assert(cit1 == l1.cend() && cit1Expected == expected1.cend());
+
+		SList<int>::const_iterator cit2 = l2.cbegin();
+		SList<int>::const_iterator cit2Expected = expected2.cbegin();
+
+		for (; cit2 != l2.cend() && cit2Expected != expected2.cend(); ++cit2, ++cit2Expected)
+		{
+			assert(*cit2 == *cit2Expected);
+		}
+
+		assert(cit2 == l2.cend() && cit2Expected == expected2.cend());
+
+		cout << endl;
+	}
+	//RESIZE
+	{
+		cout << "======== RESIZE ========" << endl;
+		SList<int>::size_type size = 10;
+		int val = 42;
+
+		SList<int> l {1, 2, 3, 4, 5};
+		cout << "List ";
+		print(l.cbegin(), l.cend());
+
+		cout << "Resize List " << size << ". Add elements of value " << val << endl;
+		l.resize(size, val);
+
+		cout << "Result: ";
+		print(l.cbegin(), l.cend());
+
+		SList<int> expected{ 1, 2, 3, 4, 5, 42, 42, 42, 42, 42 };
+
+		cout << "Expected Result: ";
+		print(expected.cbegin(), expected.cend());
+
+		SList<int>::const_iterator cit = l.cbegin();
+		SList<int>::const_iterator citExpected = expected.cbegin();
+
+		for (; cit != l.cend() && citExpected != expected.cend(); ++cit, ++citExpected)
+		{
+			assert(*cit == *citExpected);
+		}
+
+		assert(cit == l.cend() && citExpected == expected.cend());
+
+		size = 5;
+		cout << "Resize List to have size " << size << ". Removing overlowing elements" << endl;;
+
+		l.resize(size);
+
+		cout << "Result: ";
+		print(l.cbegin(), l.cend());
+
+		expected.assign({ 1, 2, 3, 4, 5});
+
+		cout << "Expected Result: ";
+		print(expected.cbegin(), expected.cend());
+
+		cit = l.cbegin();
+		citExpected = expected.cbegin();
+
+		for (; cit != l.cend() && citExpected != expected.cend(); ++cit, ++citExpected)
+		{
+			assert(*cit == *citExpected);
+		}
+
+		assert(cit == l.cend() && citExpected == expected.cend());
+		cout << endl;
+	}
+	//REMOVE
+	{
+		cout << "======== REMOVE ========" << endl;
+		int valueToRemove = 0;
+
+		SList<int> l{ valueToRemove, valueToRemove, 1, valueToRemove, valueToRemove };
+		cout << "List ";
+		print(l.cbegin(), l.cend());
+
+		cout << "Remove " << valueToRemove << " value from list" <<endl;
+
+		l.remove(valueToRemove);
+
+		cout << "Result: ";
+		print(l.cbegin(), l.cend());
+
+		SList<int> expected((size_t) 1, 1);
+
+		cout << "Expected Result: ";
+		print(expected.cbegin(), expected.cend());
+
+		SList<int>::const_iterator cit = l.cbegin();
+		SList<int>::const_iterator citExpected = expected.cbegin();
+
+		for (; cit != l.cend() && citExpected != expected.cend(); ++cit, ++citExpected)
+		{
+			assert(*cit == *citExpected);
+		}
+
+		assert(cit == l.cend() && citExpected == expected.cend());
+
+		cout << endl;
+	}
+	//REVERSE
+	{
+		cout << "======== REVERSE ========" << endl;
+		SList<int> l{ 1, 0, 0, 0, 0};
+		cout << "List ";
+		print(l.cbegin(), l.cend());
+
+		l.reverse();
+
+		cout << "Result: ";
+		print(l.cbegin(), l.cend());
+
+		SList<int> expected{0, 0, 0, 0, 1};
+
+		cout << "Expected Result: ";
+		print(expected.cbegin(), expected.cend());
+
+		SList<int>::const_iterator cit = l.cbegin();
+		SList<int>::const_iterator citExpected = expected.cbegin();
+
+		for (; cit != l.cend() && citExpected != expected.cend(); ++cit, ++citExpected)
+		{
+			assert(*cit == *citExpected);
+		}
+
+		assert(cit == l.cend() && citExpected == expected.cend());
+
+		cout << endl;
+	}
+	//UNIQUE
+	{
+		cout << "======== UNIQUE ========" << endl;
+
+		SList<int> l{ 2, 2, 1, 4, 2, 2, 5, 6, 2, 2};
+		cout << "List ";
+		print(l.cbegin(), l.cend());
+
+		cout << "Remove consecutive values from list" << endl;
+
+		l.unique();
+
+		cout << "Result: ";
+		print(l.cbegin(), l.cend());
+
+		SList<int> expected{2, 1, 4, 2, 5, 6, 2};
+
+		cout << "Expected Result: ";
+		print(expected.cbegin(), expected.cend());
+
+		SList<int>::const_iterator cit = l.cbegin();
+		SList<int>::const_iterator citExpected = expected.cbegin();
+
+		for (; cit != l.cend() && citExpected != expected.cend(); ++cit, ++citExpected)
+		{
+			assert(*cit == *citExpected);
+		}
+
+		assert(cit == l.cend() && citExpected == expected.cend());
+
+		cout << endl;
+	}
+	//UNIQUE COMPARISON
+	{
+		cout << "======== UNIQUE COMPARISON ========" << endl;
+
+		SList<int> l{ 1, 2, 3, 4, 5, 5};
+		cout << "List ";
+		print(l.cbegin(), l.cend());
+
+		cout << "Comparison is done with > " << endl;
+		l.unique(std::greater<int>());
+
+		cout << "Result: ";
+		print(l.cbegin(), l.cend());
+
+		SList<int> expected{ 1 };
+
+		cout << "Expected Result: ";
+		print(expected.cbegin(), expected.cend());
+
+		SList<int>::const_iterator cit = l.cbegin();
+		SList<int>::const_iterator citExpected = expected.cbegin();
+
+		for (; cit != l.cend() && citExpected != expected.cend(); ++cit, ++citExpected)
+		{
+			assert(*cit == *citExpected);
+		}
+
+		assert(cit == l.cend() && citExpected == expected.cend());
+
+		cout << endl;
+	}
+	//SPLICE
+	{
+		cout << "======== SPLICE ========" << endl;
+
+		SList<int> l1{ 1, 2, 8, 9, 10 };
+		cout << "List1 ";
+		print(l1.cbegin(), l1.cend());
+
+		SList<int> l2{ 3, 4, 5, 6, 7 };
+		cout << "List2 ";
+		print(l2.cbegin(), l2.cend());
+
+		SList<int>::const_iterator it = l1.cbegin();
+		++it;
+
+		l1.splice_after(it, l2);
+
+		assert(l2.empty());
+
+		cout << "Result: ";
+		print(l1.cbegin(), l1.cend());
+
+		SList<int> expected{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+
+		cout << "Expected Result: ";
+		print(expected.cbegin(), expected.cend());
+
+		SList<int>::const_iterator cit = l1.cbegin();
+		SList<int>::const_iterator citExpected = expected.cbegin();
+
+		for (; cit != l1.cend() && citExpected != expected.cend(); ++cit, ++citExpected)
+		{
+			assert(*cit == *citExpected);
+		}
+
+		assert(cit == l1.cend() && citExpected == expected.cend());
 
 		cout << endl;
 	}

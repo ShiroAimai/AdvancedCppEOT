@@ -179,7 +179,6 @@ public:
 	template<class BinaryPredicate>
 	void unique(BinaryPredicate binary_pred);
 
-
 	void splice_after(const_iterator position, SList& other);
 	void splice_after(const_iterator position, SList&& other);
 
@@ -203,8 +202,7 @@ public:
 
 private:
 	iterator before_head;
-	static iterator tail;
-
+	iterator tail;
 };
 
 #include "SListImpl.h"
