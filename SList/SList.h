@@ -188,21 +188,24 @@ public:
 	//TODO void splice_after(const_iterator position, SList& other, const_iterator first, const_iterator last);
 	//TODO void splice_after(const_iterator position, SList&& other, const_iterator first, const_iterator last);
 
-	//TODO
-	/*void sort();
+	void sort();
 	template<class Comparator>
-	void sort(Comparator comp);*/
+	void sort(Comparator comp);
 
-	/*void merge(SList& other);
+	void merge(SList& other);
 	void merge(SList&& other);
 	template<class Comparator>
 	void merge(SList& other, Comparator comp);
 	template<class Comparator>
-	void merge(SList&& other, Comparator comp);*/
-
+	void merge(SList&& other, Comparator comp);
 private:
 	iterator before_head;
 	iterator tail;
+
+	SList::size_type list_size_from(const_iterator start) const;
+	/** it is an iterator to the new begin element of sorted list*/
+	template<class Comparator>
+	void merge_sort(iterator& it, Comparator comp);
 };
 
 #include "SListImpl.h"

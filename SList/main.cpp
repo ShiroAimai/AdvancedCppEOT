@@ -776,4 +776,168 @@ int main()
 
 		cout << endl;
 	}
+	//SPLICE MOVE
+	{
+		cout << "======== SPLICE MOVE========" << endl;
+
+		SList<int> l1{ 1, 2, 8, 9, 10 };
+		cout << "List1 ";
+		print(l1.cbegin(), l1.cend());
+
+		SList<int> l2{ 3, 4, 5, 6, 7 };
+		cout << "List2 ";
+		print(l2.cbegin(), l2.cend());
+
+		SList<int>::const_iterator it = l1.cbegin();
+		++it;
+
+		l1.splice_after(it, std::move(l2));
+
+		assert(l2.empty());
+
+		cout << "Result: ";
+		print(l1.cbegin(), l1.cend());
+
+		SList<int> expected{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+
+		cout << "Expected Result: ";
+		print(expected.cbegin(), expected.cend());
+
+		SList<int>::const_iterator cit = l1.cbegin();
+		SList<int>::const_iterator citExpected = expected.cbegin();
+
+		for (; cit != l1.cend() && citExpected != expected.cend(); ++cit, ++citExpected)
+		{
+			assert(*cit == *citExpected);
+		}
+
+		assert(cit == l1.cend() && citExpected == expected.cend());
+
+		cout << endl;
+	}
+	//SORT
+	{
+		cout << "======== SORT ========" << endl;
+
+		SList<int> l{ 16, 1, 10, 2, 10, 9, 3, 8 };
+		cout << "List ";
+		print(l.cbegin(), l.cend());
+		
+		l.sort();
+
+		cout << "Result: ";
+		print(l.cbegin(), l.cend());
+
+		SList<int> expected{ 1, 2, 3, 8, 9, 10, 10, 16};
+
+		cout << "Expected Result: ";
+		print(expected.cbegin(), expected.cend());
+
+		SList<int>::const_iterator cit = l.cbegin();
+		SList<int>::const_iterator citExpected = expected.cbegin();
+
+		for (; cit != l.cend() && citExpected != expected.cend(); ++cit, ++citExpected)
+		{
+			assert(*cit == *citExpected);
+		}
+
+		assert(cit == l.cend() && citExpected == expected.cend());
+
+		l.assign({ 16, 1, 10, 32, 10, 9, 3, 8 });
+
+		cout << "List2 ";
+		print(l.cbegin(), l.cend());
+
+		l.sort(std::greater<SList<int>::value_type>());
+
+		cout << "Result: ";
+		print(l.cbegin(), l.cend());
+
+		expected.assign({ 32, 16, 10, 10, 9, 8, 3, 1 });
+
+		cout << "Expected Result: ";
+		print(expected.cbegin(), expected.cend());
+
+		cit = l.cbegin();
+		citExpected = expected.cbegin();
+
+		for (; cit != l.cend() && citExpected != expected.cend(); ++cit, ++citExpected)
+		{
+			assert(*cit == *citExpected);
+		}
+
+		assert(cit == l.cend() && citExpected == expected.cend());
+
+		cout << endl;
+	}
+	//MERGE
+	{
+		cout << "======== MERGE ========" << endl;
+
+		SList<int> l1{ 16, 1, 5, 2, 9};
+		cout << "List1 ";
+		print(l1.cbegin(), l1.cend());
+		SList<int> l2{ 3, 4, 12, 7, 8};
+		cout << "List2 ";
+		print(l2.cbegin(), l2.cend());
+		
+		l1.merge(l2);
+
+		assert(l2.empty());
+
+		cout << "Result: ";
+		print(l1.cbegin(), l1.cend());
+
+		SList<int> expected{ 1, 2, 3, 4, 5, 7, 8, 9, 12, 16 };
+
+		cout << "Expected Result: ";
+		print(expected.cbegin(), expected.cend());
+
+		SList<int>::const_iterator cit = l1.cbegin();
+		SList<int>::const_iterator citExpected = expected.cbegin();
+
+		for (; cit != l1.cend() && citExpected != expected.cend(); ++cit, ++citExpected)
+		{
+			assert(*cit == *citExpected);
+		}
+
+		assert(cit == l1.cend() && citExpected == expected.cend());
+
+		cout << endl;
+	}
+	//MERGE MOVE
+	{
+		cout << "======== MERGE MOVE ========" << endl;
+
+		SList<int> l1{ 16, 1, 5, 2, 9 };
+		cout << "List1 ";
+		print(l1.cbegin(), l1.cend());
+		SList<int> l2{ 3, 4, 12, 7, 8 };
+		cout << "List2 ";
+		print(l2.cbegin(), l2.cend());
+
+		l1.merge(std::move(l2));
+
+		assert(l2.empty());
+
+		cout << "Result: ";
+		print(l1.cbegin(), l1.cend());
+
+		SList<int> expected{ 1, 2, 3, 4, 5, 7, 8, 9, 12, 16 };
+
+		cout << "Expected Result: ";
+		print(expected.cbegin(), expected.cend());
+
+		SList<int>::const_iterator cit = l1.cbegin();
+		SList<int>::const_iterator citExpected = expected.cbegin();
+
+		for (; cit != l1.cend() && citExpected != expected.cend(); ++cit, ++citExpected)
+		{
+			assert(*cit == *citExpected);
+		}
+
+		assert(cit == l1.cend() && citExpected == expected.cend());
+
+		cout << endl;
+	}
 }

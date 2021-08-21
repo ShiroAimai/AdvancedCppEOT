@@ -3,6 +3,86 @@
 #include <algorithm>
 #include <cassert>
 
+#pragma region SLIST SORT UTILS
+template<class T>
+typename SList<T>::size_type SList<T>::list_size_from(const_iterator start) const
+{
+	size_type size = 0;
+	for (; start.m_ptr != nullptr; ++start)
+	{
+		++size;
+	}
+
+	return size;
+}
+
+template<class T>
+template<class Comparator>
+void SList<T>::merge_sort(iterator& it, Comparator comp)
+{
+	if(it.m_ptr == nullptr || it.m_ptr->Next == nullptr) return; //no sort can be applied
+
+	size_type half_list_size = list_size_from(it) / 2;
+
+	iterator it_half_list = it; //last node in low half list
+	for (size_type i = 0; i < (half_list_size - 1); ++i)
+	{
+		++it_half_list; 
+	}
+
+	const_iterator cit_low_half_list_end = it_half_list;
+	++it_half_list;
+	cit_low_half_list_end.m_ptr->Next = nullptr; //split half lists
+
+	merge_sort(it, comp);
+	merge_sort(it_half_list, comp);
+
+	//merge sorted sub_lists
+	iterator itSorted(nullptr);
+	if (comp(*it, *it_half_list))
+	{
+		itSorted = it;
+		++it;
+	}
+	else
+	{
+		itSorted = it_half_list;
+		++it_half_list;
+	}
+
+	iterator StartSortedList = itSorted;
+	const_iterator cend = nullptr;
+
+	for (; it != cend && it_half_list != cend;)
+	{
+		if (comp(*it, *it_half_list))
+		{
+			itSorted.m_ptr->Next = it.m_ptr;
+			++itSorted;
+			++it;
+		}
+		else
+		{
+			itSorted.m_ptr->Next = it_half_list.m_ptr;
+			++itSorted;
+			++it_half_list;
+		}
+	}
+
+	//check if sublists were of different length, if yes add in queue
+	if (it != cend)
+	{
+		itSorted.m_ptr->Next = it.m_ptr;
+	}
+	else if(it_half_list != cend)
+	{
+		itSorted.m_ptr->Next = it_half_list.m_ptr;
+	}
+
+	it = StartSortedList;
+}
+
+#pragma endregion
 template<class T>
 SList<T>::SList() : before_head(new Node()), tail(nullptr)
 {
@@ -12,7 +92,7 @@ SList<T>::SList() : before_head(new Node()), tail(nullptr)
 template<class T>
 SList<T>::~SList()
 {
-	if (before_head == tail) return;
+	if (!before_head.m_ptr || before_head.m_ptr->Next == nullptr) return;
 
 	delete before_head.m_ptr;
 }
@@ -20,32 +100,32 @@ SList<T>::~SList()
 template<class T>
 SList<T>::SList(SList::size_type n) : SList()
 {
-	insert_after(cbefore_begin(), n, value_type());
+	insert_after(before_head, n, value_type());
 }
 
 template<class T>
 SList<T>::SList(size_type n, const value_type& val) : SList()
 {
-	insert_after(cbefore_begin(), n, val);
+	insert_after(before_head, n, val);
 }
 
 template<class T>
 template<class InputIterator>
 SList<T>::SList(InputIterator first, InputIterator last) : SList()
 {
-	insert_after(cbefore_begin(), first, last);
+	insert_after(before_head, first, last);
 }
 
 template<class T>
 SList<T>::SList(std::initializer_list<SList<T>::value_type> il) : SList()
 {
-	insert_after(cbefore_begin(), il);
+	insert_after(before_head, il);
 }
 
 template<class T>
 SList<T>::SList(const SList& list) : SList()
 {
-	insert_after(cbefore_begin(), list.cbegin(), list.cend());
+	insert_after(before_head, list.cbegin(), list.cend());
 }
 
 template<class T>
@@ -65,7 +145,7 @@ typename SList<T>::iterator SList<T>::before_begin() noexcept
 template<class T>
 typename SList<T>::const_iterator SList<T>::cbefore_begin() const noexcept
 {
-	return const_iterator(before_head.m_ptr);
+	return before_head;
 }
 
 template<class T>
@@ -79,9 +159,9 @@ typename SList<T>::iterator SList<T>::begin() noexcept
 template<class T>
 typename SList<T>::const_iterator SList<T>::cbegin() const noexcept
 {
-	const_iterator cit(before_head);
-	++cit;
-	return cit;
+	const_iterator cbegin = cbefore_begin();
+	cbegin++;
+	return cbegin;
 }
 
 template<class T>
@@ -92,7 +172,7 @@ typename SList<T>::iterator SList<T>::end() noexcept
 		return iterator(tail.m_ptr->Next);
 	}
 
-	return tail;
+	return tail; //here tail is an invalid iterator, should not be dereferenced
 }
 
 template<class T>
@@ -103,7 +183,7 @@ typename SList<T>::const_iterator SList<T>::cend() const noexcept
 		return const_iterator(tail.m_ptr->Next);
 	}
 
-	return const_iterator(tail.m_ptr);
+	return const_iterator(tail.m_ptr); //here tail is an invalid iterator, should not be dereferenced
 }
 
 template<class T>
@@ -461,14 +541,12 @@ void SList<T>::reverse() noexcept
 {
 	iterator it = begin();
 
-	if (it == end()) return; //there's nothing to reverse
+	if (it == end() || it == tail) return; //there's nothing to reverse
 
 	iterator prevIt = it;
 	++it;
 	prevIt.m_ptr->Next = nullptr;
 	tail = prevIt;
-
-	if (it == end()) return; //it means the list is composed of only one element
 
 	before_head.m_ptr->Next = nullptr;
 	iterator nextIt = it.m_ptr->Next;
@@ -560,10 +638,13 @@ void SList<T>::splice_after(const_iterator position, SList&& other)
 {
 	if (this == &other) return; //splicing the same list
 	Node* PrevNextElement = position.m_ptr->Next; //element next to position
-	position.m_ptr->Next = std::move(other.before_head->Next); //moving other first element next to position
-	other.before_head->Next = nullptr; //reset other after move
+	position.m_ptr->Next = std::move(other.before_head.m_ptr->Next); //moving other first element next to position
+	
+	//reset other
+	other.before_head.m_ptr->Next = nullptr;
+	other.tail = nullptr;
 
-	iterator it = position;
+	const_iterator it = position;
 	while (it.m_ptr->Next != nullptr)
 	{
 		++it;
@@ -572,7 +653,7 @@ void SList<T>::splice_after(const_iterator position, SList&& other)
 	it.m_ptr->Next = PrevNextElement;
 	if (position == tail)
 	{
-		tail = it; //new tail is last element of other
+		tail.m_ptr = it.m_ptr; //new tail is last element of other
 	}
 }
 
@@ -617,28 +698,59 @@ template<class T>
 void SList<T>::splice_after(const_iterator position, SList& other, const_iterator first, const_iterator last);
 template<class T>
 void SList<T>::splice_after(const_iterator position, SList&& other, const_iterator first, const_iterator last);
-
+*/
 template<class T>
 void SList<T>::sort()
 {
-	//TODO
+	sort(std::less<value_type>());
 }
 
 template<class T>
 template<class Comparator>
 void SList<T>::sort(Comparator comp)
 {
-	//TODO
+	iterator NewBegin = begin();
+	merge_sort(NewBegin, comp);
+	before_head.m_ptr->Next = NewBegin.m_ptr;
+
+	if(NewBegin.m_ptr)
+	{
+		tail = NewBegin;
+		for (; tail.m_ptr->Next != nullptr;)
+		{
+			++tail;	
+		}
+	}
+
 }
 
 
 template<class T>
-void SList<T>::merge(SList& other);
+void SList<T>::merge(SList& other)
+{
+	splice_after(tail, other);
+	sort();
+}
+
 template<class T>
-void SList<T>::merge(SList&& other);
+void SList<T>::merge(SList&& other)
+{
+	splice_after(tail, std::forward<SList<value_type>>(other));
+	sort();
+}
+
 template<class T>
 template<class Comparator>
-void SList<T>::merge(SList& other, Comparator comp);
+void SList<T>::merge(SList& other, Comparator comp)
+{
+	splice_after(tail, other);
+	sort(comp);
+}
+
 template<class T>
 template<class Comparator>
-void SList<T>::merge(SList&& other, Comparator comp);*/
+void SList<T>::merge(SList&& other, Comparator comp)
+{
+	splice_after(tail, std::forward<SList<value_type>>(other));
+	sort(comp);
+}
