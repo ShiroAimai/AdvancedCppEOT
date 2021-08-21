@@ -133,7 +133,6 @@ SList<T>::SList(SList&& list) : before_head(nullptr), tail(nullptr)
 {
 	std::swap(before_head, list.before_head);
 	std::swap(tail, list.tail);
-	list.before_head = list.end();
 }
 
 template<class T>
@@ -332,7 +331,7 @@ void SList<T>::push_front(const value_type& val)
 template<class T>
 void SList<T>::push_front(value_type&& val)
 {
-	insert_after(cbefore_begin(), std::move(val));
+	insert_after(before_head, std::forward<value_type>(val));
 }
 
 template<class T>
@@ -344,7 +343,7 @@ void SList<T>::pop_front()
 template<class T>
 typename SList<T>::iterator SList<T>::insert_after(const_iterator position, const value_type& val)
 {
-	iterator prevIt = iterator(position.m_ptr);
+	iterator prevIt(position.m_ptr);
 	const_iterator NextPos = position;
 	++NextPos;
 
@@ -353,7 +352,7 @@ typename SList<T>::iterator SList<T>::insert_after(const_iterator position, cons
 	
 	if (NextPos.m_ptr == nullptr)
 	{
-		tail = iterator(NewEl); //new tail is the new element
+		tail.m_ptr = NewEl; //new tail is the new element
 	}
 
 	return iterator(NewEl);
@@ -374,7 +373,7 @@ typename SList<T>::iterator SList<T>::insert_after(const_iterator position, valu
 
 	if (NextPos.m_ptr == nullptr)
 	{
-		tail = iterator(NewEl); //new tail is the new element
+		tail.m_ptr = NewEl; //new tail is the new element
 	}
 
 	return iterator(NewEl);
@@ -420,7 +419,7 @@ typename SList<T>::iterator SList<T>::erase_after(const_iterator position)
 	if (it == tail) 
 	{
 		Node* tailPtr = prevIt != cbefore_begin() ? prevIt.m_ptr : nullptr;
-		tail = iterator(tailPtr);
+		tail.m_ptr = tailPtr;
 	}
 
 	if (it.m_ptr != nullptr)
@@ -492,7 +491,7 @@ void SList<T>::resize(size_type n, const value_type& val)
 template<class T>
 void SList<T>::clear() noexcept
 {
-	erase_after(before_head, end());
+	erase_after(cbefore_begin(), cend());
 }
 
 template<class T>
@@ -549,7 +548,7 @@ void SList<T>::reverse() noexcept
 	tail = prevIt;
 
 	before_head.m_ptr->Next = nullptr;
-	iterator nextIt = it.m_ptr->Next;
+	iterator nextIt(it.m_ptr->Next);
 	iterator _end = end();
 	
 	for (; it != _end;)
@@ -629,7 +628,7 @@ void SList<T>::splice_after(const_iterator position, SList& other)
 	it.m_ptr->Next = PrevNextElement;
 	if (position == tail)
 	{
-		tail = iterator(it.m_ptr); //new tail is last element of other
+		tail.m_ptr = it.m_ptr; //new tail is last element of other
 	}
 }
 
@@ -637,6 +636,7 @@ template<class T>
 void SList<T>::splice_after(const_iterator position, SList&& other)
 {
 	if (this == &other) return; //splicing the same list
+	
 	Node* PrevNextElement = position.m_ptr->Next; //element next to position
 	position.m_ptr->Next = std::move(other.before_head.m_ptr->Next); //moving other first element next to position
 	
@@ -721,7 +721,6 @@ void SList<T>::sort(Comparator comp)
 			++tail;	
 		}
 	}
-
 }
 
 
