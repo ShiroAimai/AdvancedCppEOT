@@ -780,7 +780,6 @@ BigInt operator~(const BigInt& a)
 	for (size_t i = 0; i < res.m_value.size(); ++i)
 		res.m_value[i] = ~res.m_value[i];
 
-
 	return res;
 }
 
@@ -826,9 +825,9 @@ BigInt operator>>(const BigInt& a, const BigInt& b)
 
 BigInt pow(const BigInt& base, const BigInt& exp)
 {
-	BigInt _base{ base };
-	BigInt _exp{ exp };
-	BigInt result{ 1 };
+	BigInt _base(base);
+	BigInt _exp(exp);
+	BigInt result(1);
 
 	while (_exp > 0)
 	{
@@ -838,12 +837,16 @@ BigInt pow(const BigInt& base, const BigInt& exp)
 		}
 
 		_exp >>= 1; //equivalent to dividing by two
-		_base *= _base; //accumulate base
+		if(_exp > 0)
+		{
+			_base *= _base; //accumulate base
+		}
 	}
 
 	return result;
 }
 
+/** Make us of a vector<string> to hold all digits and sign */
 std::ostream& operator<<(std::ostream& os, const BigInt& value)
 {
 	std::vector<std::string> out;
@@ -852,7 +855,7 @@ std::ostream& operator<<(std::ostream& os, const BigInt& value)
 	a.bIsNegative = false; // make positive to avoid undefined behavior in division
 
 	constexpr BigInt::DoubleCapacityDataSeed divisor = max_power10(); //divisor is used to "Pop" elements from left to right in m_value
-	while (a > divisor) //every iteration it returns the exact value in decimal of the head of m_value
+	while (a > divisor) //every iteration it returns the exact value in decimal of the current a.m_value[0]
 	{
 		const BigInt rest = a.Divide(divisor);
 		const std::string resultDigit = ToStringFormatted(rest.m_value[0]);

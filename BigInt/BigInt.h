@@ -4,11 +4,11 @@
 #include <string>
 
 /**
- * This class models an unlimited integer. Can contains an unlimited number of digits
+ * This class models an unlimited integer. Can contain an unlimited number of digits (int32)
  *
  * No time efficient for very large integers
- * Space efficiency thanks to the deque
- * Random access thanks to the deque
+ * Space efficiency due to the deque
+ * Random access due to the deque
  */
 
 class BigInt
