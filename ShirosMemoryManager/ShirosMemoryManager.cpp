@@ -19,6 +19,10 @@ ShirosMemoryManager::ShirosMemoryManager()
 
 }
 
+ShirosMemoryManager::~ShirosMemoryManager()
+{
+	cout << "===== RELEASED ALLOCATED MEMORY ======" << endl;
+}
 void* ShirosMemoryManager::Allocate(const size_t ObjSize, const AllocationType AllocType, const size_t Alignment /* = alignof(std::max_align_t) */)
 {	
 	void* p_res = nullptr;
@@ -101,7 +105,6 @@ bool ShirosMemoryManager::CanBeHandledWithSmallObjAllocator(size_t ObjSize) cons
 
 void ShirosMemoryManager::PrintMemoryState()
 {
-
 	size_t m_totAllocatedMemory = m_smallObjAllocator.GetTotalAllocatedMemory() + m_freeListAllocator.GetTotalAllocatedMemory();
 	cout << "===== MEMORY STATE ======" << endl;
 	cout << "| Total Memory Allocated: " << m_totAllocatedMemory << " |" << endl;

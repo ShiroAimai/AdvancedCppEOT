@@ -16,10 +16,11 @@ public:
 		Single,
 		Collection
 	};
-
+	
+	virtual ~ShirosMemoryManager();
 	ShirosMemoryManager(const ShirosMemoryManager&) = delete;
 	ShirosMemoryManager& operator=(const ShirosMemoryManager&) = delete;
-
+	
 	static size_t CHUNK_SIZE;
 	static size_t MAX_SMALL_OBJ_SIZE;
 	static size_t FREE_LIST_SIZE;

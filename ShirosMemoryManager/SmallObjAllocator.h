@@ -11,6 +11,7 @@ class SmallObjAllocator
 {
 public:
 	SmallObjAllocator(const size_t chunkSize);
+	virtual ~SmallObjAllocator();
 
 	void* Allocate(const size_t bytes);
 	void Deallocate(void* p_obj, const size_t size_obj);

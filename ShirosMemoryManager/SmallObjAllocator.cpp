@@ -11,6 +11,15 @@ SmallObjAllocator::SmallObjAllocator(const size_t chunkSize)
 
 }
 
+SmallObjAllocator::~SmallObjAllocator()
+{
+	AllocatorPool::iterator it = m_Pool.begin();
+	for (; it != m_Pool.end(); ++it)
+	{
+		it->Release();
+	}
+}
+
 void* SmallObjAllocator::Allocate(const size_t bytes)
 {
 	//check if we already allocated an allocator, and if this one manage Chunk of the desired size
