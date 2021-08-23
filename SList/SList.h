@@ -1,6 +1,14 @@
 #pragma once
 #include <memory>
 
+/**
+ * Single Linked List 
+ * 
+ * A custom forward linked list data structure. It is based on an underlying implementation of a Node that knows only the related info and what node comes next.
+ *
+ *@author Nicola Cisternino
+ *
+ */
 template<class T>
 class SList
 {
@@ -14,6 +22,7 @@ public:
 	using difference_type = std::ptrdiff_t;
 
 private:
+	/** Underlying list element. This structure is almost exclusively manager by the iterators  */
 	struct Node
 	{
 		value_type info;
@@ -31,6 +40,7 @@ private:
 	};
 
 public:
+	/** Iterator data structure. It is configurable to be either const or non const */
 	template<bool IsConst = false>
 	struct Iterator {
 		friend class SList;
@@ -199,11 +209,12 @@ public:
 	template<class Comparator>
 	void merge(SList&& other, Comparator comp);
 private:
-	iterator before_head;
-	iterator tail;
+	iterator before_head; //iterator to the element in list that precedes the first
+	iterator tail; //iterator to the last element in list
 
+	/** Compute the size of a sublist starting from to the end of the list */
 	SList::size_type list_size_from(const_iterator start) const;
-	/** it is an iterator to the new begin element of sorted list*/
+	/** [it] is an iterator to the new begin element of sorted list. O(nlogn)*/
 	template<class Comparator>
 	void merge_sort(iterator& it, Comparator comp);
 };

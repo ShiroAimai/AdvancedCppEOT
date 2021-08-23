@@ -6,16 +6,19 @@
 /**
  * This class models an unlimited integer. Can contain an unlimited number of digits (int32)
  *
- * No time efficient for very large integers
+ * Not very time efficient for large integers
  * Space efficiency due to the deque
  * Random access due to the deque
+ * 
+ * - The data is managed by a deque. Every entry of the deque has base 2^32 bit (managed as an unsigned int 32).
+ * - Sign is managed separately using a boolean
  */
 
 class BigInt
 {
 public:
 	//convenient typedefs for our class
-		//using fixed size integer types
+	//using fixed size integer types
 	using DataSeed = uint32_t;
 	using SignedDataSeed = int32_t;
 	using DoubleCapacityDataSeed = uint64_t;
@@ -23,8 +26,8 @@ public:
 private:
 	using BIDigits = std::deque<DataSeed>;
 	//core internal state
-	BIDigits m_value; //head (leftmost) indicates the low digital position
-	bool bIsNegative;
+	BIDigits m_value; //head (leftmost) indicates the low digital position. Each entry has base of 2^32
+	bool bIsNegative; //identify BigInt sign
 
 	/*
 	* Unsigned operation result value class
@@ -32,9 +35,12 @@ private:
 	*/
 	struct UOperationResult
 	{
+		/** Temporary value to hold the result for an operation between two values of type DataSeed */
 		DoubleCapacityDataSeed res;
 
+		/** Returns a DataSeed value identifying the first 32 bits of res starting from the right */
 		DataSeed GetLowerHalf() const;
+		/** Returns a DataSeed value identifying the latest 32 bits of res starting from the left */
 		DataSeed GetHighHalf() const;
 	};
 private:
@@ -70,6 +76,7 @@ public:
 	BigInt(const BigInt& Other);
 	BigInt(BigInt&& Other) noexcept;
 
+	/* ==== EXPLICIT CONVERSION OPERATORS ==== */
 	explicit operator bool() const;
 	explicit operator DataSeed() const;
 	explicit operator DoubleCapacityDataSeed() const;
@@ -129,7 +136,6 @@ public:
 	friend std::ostream& operator<<(std::ostream& os, const BigInt& value);
 
 	/* ==== UTILITIES ==== */
-
 	enum class ComparationResult {
 		Equals,
 		Greater,

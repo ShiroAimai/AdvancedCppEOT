@@ -10,31 +10,37 @@
 using std::cout;
 using std::endl;
 
+/** Internal Linkage local functions */
 namespace
 {
+	/** Fixed values for decimal bases. Used to compute base for 2^32 (4 bytes) and 2^64(8 bytes)*/
 	constexpr BigInt::DoubleCapacityDataSeed max_power10_in_max_power2[] = { 0, 100, 10000, 10000000, 1000000000, 1000000000000, 100000000000000, 10000000000000000, 10000000000000000000 };
 
-	constexpr BigInt::DoubleCapacityDataSeed max_power10()
+	/** Convenient getter to get decimal base for an element of base 2^32*/
+	constexpr BigInt::DoubleCapacityDataSeed dataseed_power10()
 	{
 		return max_power10_in_max_power2[sizeof(BigInt::DataSeed)];
 	}
 
+	/** Type trait to count the digits for a number in decimal base */
 	template <BigInt::DoubleCapacityDataSeed T>
 	struct count_digits
 	{
 		static constexpr BigInt::DoubleCapacityDataSeed value = 1 + count_digits<T / 10>::value;
 
 	};
-
+	
+	/** Explicit type trait for zero */
 	template <>
 	struct count_digits<0>
 	{
 		static constexpr BigInt::DoubleCapacityDataSeed value = 0;
 	};
 
-	constexpr BigInt::DoubleCapacityDataSeed max_digits()
+	/** Count digits for an entry of BigInt */
+	constexpr BigInt::DoubleCapacityDataSeed bigint_entry_digits()
 	{
-		return count_digits<max_power10()>::value;
+		return count_digits<dataseed_power10()>::value;
 	}
 
 	bool IsAllNumbers(const std::string& Value)
@@ -42,10 +48,10 @@ namespace
 		return !Value.empty() && std::find_if(Value.begin(), Value.end(), [](unsigned char c) { return !std::isdigit(c); }) == Value.end();
 	}
 
-	//reppresentation that maintains leading zeroes
+	//representation that maintains leading zeroes
 	std::string ToStringFormatted(BigInt::DoubleCapacityDataSeed num)
 	{
-		constexpr BigInt::DoubleCapacityDataSeed baseDigits = max_digits();
+		constexpr BigInt::DoubleCapacityDataSeed baseDigits = bigint_entry_digits();
 		
 		std::string format = "%0";
 		format.append(std::to_string(baseDigits - 1)); ///only zeroes
@@ -82,7 +88,7 @@ void BigInt::Sum(const BigInt& Other)
 		const DoubleCapacityDataSeed secondOperand = index < Other.m_value.size() ? Other.m_value[index] : 0;
 
 		UOperationResult opResult;
-		opResult.res = firstOperand + secondOperand + depositary;
+		opResult.res = firstOperand + secondOperand + depositary; //add rest fro previous calculation
 
 		m_value[index] = opResult.GetLowerHalf(); //lower half of res
 		depositary = opResult.GetHighHalf(); //high half of res
@@ -90,7 +96,7 @@ void BigInt::Sum(const BigInt& Other)
 
 	if (depositary > 0)
 	{
-		m_value.push_back(depositary); //add depositary as new element in deque
+		m_value.push_back(depositary); //add depositary(rest) as new element in deque
 	}
 }
 
@@ -101,16 +107,16 @@ void BigInt::Sub(const BigInt& Other)
 
 	SignedDoubleCapacityDataSeed depositary(0);
 
-	bool IsGreaterOrEqualToOther = AbsCompareWith(Other) != ComparationResult::Less;
-
-	const SignedDoubleCapacityDataSeed firstOperandSign = IsGreaterOrEqualToOther ? +1 : -1;
-	const SignedDoubleCapacityDataSeed secondOperandSign = -firstOperandSign;
+	//In order to always have a positive value, subtract following the logic: Greater - Smaller
+	bool IsGreaterOrEqualToOther = AbsCompareWith(Other) != ComparationResult::Less; //evaluate greater element (not considering sign)
+	const SignedDoubleCapacityDataSeed firstOperandSign = IsGreaterOrEqualToOther ? +1 : -1; //greater instance will be positive
+	const SignedDoubleCapacityDataSeed secondOperandSign = -firstOperandSign; //smaller instance will be the opposite of the greater one
 
 	for (size_t index = 0; index < ResLength; ++index)
 	{
 		SignedDoubleCapacityDataSeed firstOperandValue = m_value[index];
 		SignedDoubleCapacityDataSeed secondOperandValue = index < Other.m_value.size() ? Other.m_value[index] : 0;
-
+		//res formula will always be as A + (-B)
 		SignedDoubleCapacityDataSeed res = (firstOperandSign * firstOperandValue) + (secondOperandSign * secondOperandValue) + depositary;
 
 		if (res >= 0)
@@ -120,8 +126,9 @@ void BigInt::Sub(const BigInt& Other)
 		}
 		else
 		{
+			//res is negative so we're actually doing a subtraction
 			m_value[index] = std::numeric_limits<DataSeed>::max() + (res + 1); //willingly taking only the lowest bits
-			depositary = -1; //remove one from the immediate greater decimal
+			depositary = -1; //remove one from the following entry in m_value
 		}
 	}
 
@@ -154,8 +161,8 @@ void BigInt::Multiply(const BigInt& rhs)
 }
 
 /** Uses occupied bit of lhs to add multiplier, properly shifted, to result
- * always sum rhs to result
- * lhs is used only at bitwise level, no arithmetic is performed
+ *  always sum rhs to result
+ *  lhs is used only at bitwise level, no arithmetic is performed
 */
 BigInt BigInt::VariantPeasantMultiply(const BigInt& lhs, const BigInt& rhs) const
 {
@@ -356,8 +363,11 @@ std::pair <BigInt, BigInt> BigInt::DivideFastImpl(const BigInt& Other) const
 
 size_t BigInt::GetBits() const
 {
+	//always take at least (size - 1) * CHAR_BIT bits
 	size_t out = (m_value.empty() ? 0 : (m_value.size() - 1)) * (sizeof(DataSeed) * CHAR_BIT);
 	DataSeed msb = m_value.empty() ? 0 : m_value.back();
+	//the last entry could not be using all the bits, so evaluate every element until msb is 0
+	//step is dividing by two msb
 	while (msb) {
 		msb >>= 1;
 		out++;
@@ -369,8 +379,8 @@ size_t BigInt::GetBits() const
 bool BigInt::GetBitValueAt(size_t index) const
 {
 	static constexpr size_t bits = sizeof(DataSeed) * CHAR_BIT;
-	DataSeed interestedValue = m_value[index / bits];
-	return (interestedValue >> index) & 1;
+	DataSeed interestedValue = m_value[index / bits]; //get the right entry for m_value based on bit index
+	return (interestedValue >> index) & 1; //shift value by index to get the interested bit at position 0 and confront against 1 to get the value
 }
 
 BigInt::BigInt() : m_value(1), bIsNegative(false) {}
@@ -476,11 +486,11 @@ BigInt& BigInt::operator+=(const BigInt& rhs)
 {
 	if (bIsNegative == rhs.bIsNegative)
 	{
-		Sum(rhs);
+		Sum(rhs); // A + B
 	}
 	else
 	{
-		Sub(rhs);
+		Sub(rhs); // A + (-B) || (-A) + B
 	}
 
 	return *this;
@@ -490,10 +500,10 @@ BigInt& BigInt::operator-=(const BigInt& rhs)
 {
 	if (bIsNegative != rhs.bIsNegative)
 	{
-		Sum(rhs);
+		Sum(rhs); // A + (-B) || (-A) + B
 	}
 	else {
-		Sub(rhs);
+		Sub(rhs); // (-A) - (-B)
 	}
 
 	return *this;
@@ -507,13 +517,13 @@ BigInt& BigInt::operator*=(const BigInt& rhs)
 
 BigInt& BigInt::operator/=(const BigInt& rhs)
 {
-	Divide(rhs); //we ignore the rest
+	Divide(rhs); //we ignore the returned value (module), Divide is side effect method
 	return *this;
 }
 
 BigInt& BigInt::operator%=(const BigInt& rhs)
 {
-	*this = Divide(rhs); //we override this value with the mod value returned by Divide method
+	*this = Divide(rhs); //we override the value of [this] with the module value returned by Divide method
 	return *this;
 }
 
@@ -563,7 +573,7 @@ BigInt& BigInt::operator<<=(const BigInt& rhs)
 		return *this;
 
 	BigInt ShiftTotal(rhs);
-	constexpr size_t MaxShiftForEntry = sizeof(DataSeed) * CHAR_BIT;
+	static constexpr size_t MaxShiftForEntry = sizeof(DataSeed) * CHAR_BIT;
 
 	while (ShiftTotal > 0)
 	{
@@ -573,6 +583,7 @@ BigInt& BigInt::operator<<=(const BigInt& rhs)
 
 		ShiftTotal -= MaxShiftForEntry;
 
+		//Evaluate value with CurrentShift
 		DataSeed depositary = 0;
 		for (size_t i = 0; i < m_value.size(); ++i)
 		{
@@ -600,13 +611,15 @@ BigInt& BigInt::operator>>=(const BigInt& rhs)
 	if (bIsNegative || rhs <= 0) return *this;
 
 	BigInt ShiftTotal(rhs);
-	constexpr size_t MaxShiftForEntry = sizeof(DataSeed) * CHAR_BIT;
+	static constexpr size_t MaxShiftForEntry = sizeof(DataSeed) * CHAR_BIT;
 
 	while (ShiftTotal > 0)
 	{
 		//CurrentShift is a portion of ShiftTotal (max sizeof(DataSeed) * CHAR_BIT)
 		//shift total size of CurrentShift
 		DataSeed CurrentShift = (ShiftTotal < MaxShiftForEntry) ? ShiftTotal.m_value[0] : MaxShiftForEntry;
+
+		//Evaluate value with CurrentShift
 		DataSeed depositary = 0;
 		for (long long i = m_value.size() - 1; i >= 0; --i)
 		{
@@ -633,14 +646,16 @@ BigInt& BigInt::operator>>=(const BigInt& rhs)
 
 BigInt::ComparationResult BigInt::AbsCompareWith(const BigInt& Other) const
 {
+	//if they differs for size, then the one with the greater size is the greater
 	if (m_value.size() != Other.m_value.size())
 		return m_value.size() > Other.m_value.size() ? ComparationResult::Greater : ComparationResult::Less;
 
 	assert(m_value.size() == Other.m_value.size());
 
+	//evaluate each entry of m_value, comparing entry for this with entry for other at the same index
 	for (long long index = m_value.size() - 1; index >= 0; index--)
 	{
-		if (m_value[index] == Other.m_value[index])
+		if (m_value[index] == Other.m_value[index]) //skip evaluation of equal elements
 			continue;
 		return m_value[index] > Other.m_value[index] ? ComparationResult::Greater : ComparationResult::Less;
 	}
@@ -650,6 +665,7 @@ BigInt::ComparationResult BigInt::AbsCompareWith(const BigInt& Other) const
 
 BigInt::ComparationResult BigInt::CompareWith(const BigInt& Other) const
 {
+	//first evaluate if sign are different, if one is positive that is certainly the greater one
 	if (bIsNegative != Other.bIsNegative)
 	{
 		return (!bIsNegative && Other.bIsNegative) ? ComparationResult::Greater : ComparationResult::Less;
@@ -657,17 +673,19 @@ BigInt::ComparationResult BigInt::CompareWith(const BigInt& Other) const
 
 	assert(bIsNegative == Other.bIsNegative);
 
+	//Fallback on evaluating only the unsigned value of m_value
 	ComparationResult res = AbsCompareWith(Other);
 
-	//if they're both negative, means we have to invert the result because the closer a number is to 0 the greater it is
+	//if they're both positive then we can use the operation result
 	if(!bIsNegative) return res;
 
 	assert(bIsNegative);
-
+	
+	//otherwise they're both negative, means we have to invert the result because the closer a negative number is to 0 the greater it is
 	if(res == ComparationResult::Greater) return ComparationResult::Less;
 	else if (res == ComparationResult::Less) return ComparationResult::Greater;
 
-	return res; //they're negative and equals
+	return res; //they're equals
 }
 
 BigInt& BigInt::operator++()
@@ -831,7 +849,7 @@ BigInt pow(const BigInt& base, const BigInt& exp)
 
 	while (_exp > 0)
 	{
-		if (_exp.isOdd())
+		if (_exp.isOdd()) //apply accumulated base only when exp is odd
 		{
 			result *= _base; //apply accumulated base
 		}
@@ -854,7 +872,7 @@ std::ostream& operator<<(std::ostream& os, const BigInt& value)
 	BigInt a{ value };
 	a.bIsNegative = false; // make positive to avoid undefined behavior in division
 
-	constexpr BigInt::DoubleCapacityDataSeed divisor = max_power10(); //divisor is used to "Pop" elements from left to right in m_value
+	constexpr BigInt::DoubleCapacityDataSeed divisor = dataseed_power10(); //divisor is used to "Pop" elements from left to right in m_value
 	while (a > divisor) //every iteration it returns the exact value in decimal of the current a.m_value[0]
 	{
 		const BigInt rest = a.Divide(divisor);
