@@ -19,6 +19,7 @@ public:
 	void Reset();
 	inline size_t GetTotalAllocatedMemory() const { return m_totMemoryAllocated; }
 
+	/** Prevent copy for this class */
 	SmallObjAllocator(const SmallObjAllocator&) = delete;
 	SmallObjAllocator& operator=(const SmallObjAllocator&) = delete;
 private:
@@ -28,6 +29,8 @@ private:
 	FixedAllocator* m_lastAllocatorUsedForAllocation = nullptr;
 	FixedAllocator* m_lastAllocatorUsedForDeallocation = nullptr;
 	size_t m_chunkSize;
+	
+	//DEBUG
 	size_t m_totMemoryAllocated = 0;
 };
 

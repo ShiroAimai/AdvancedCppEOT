@@ -8,6 +8,10 @@
 using std::cout;
 using std::endl;
 
+#ifdef _DEBUG
+#define MM_DEBUG
+#endif
+
 class ShirosMemoryManager /*Singleton*/
 {
 public:
@@ -18,12 +22,17 @@ public:
 	};
 	
 	virtual ~ShirosMemoryManager();
+	/** Prevent copy for this class */
 	ShirosMemoryManager(const ShirosMemoryManager&) = delete;
 	ShirosMemoryManager& operator=(const ShirosMemoryManager&) = delete;
 	
+	/** Chunk size for SmallObjectAllocator. Default is 4Kb */
 	static size_t CHUNK_SIZE;
+	/** Max size manageable by SmallObjAllocator. Default is 128 bytes */
 	static size_t MAX_SMALL_OBJ_SIZE;
+	/** Memory pool to preallocate for FreeListAllocator. Default is 64Kb */
 	static size_t FREE_LIST_SIZE;
+	/** Fit policy to use for FreeListAllocator. Default is BestFit*/
 	static FreeListAllocator::FitPolicy FREE_LIST_POLICY;
 
 	static ShirosMemoryManager& Get();
@@ -62,7 +71,7 @@ inline void* operator new(size_t ObjSize, size_t Alignment, char const* function
 {
 #ifdef MM_DEBUG
 	cout << "Requested allocation of " << ObjSize << " bytes requested by line " << line << " in function " << function << " in file " << file << endl;
-#endif // MM_DEBUG
+#endif
 
 	return ShirosMemoryManager::Get().Allocate(ObjSize, ShirosMemoryManager::AllocationType::Single, Alignment);
 }

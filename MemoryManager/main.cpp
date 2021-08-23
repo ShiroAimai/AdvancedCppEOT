@@ -16,8 +16,6 @@
 #include <chrono>
 #include <cassert>
 
-//#define MM_DEBUG //enable debug logs for MM
-
 #ifdef GLOBAL_OP_OVERLOAD
 #define GLOBAL_SHIRO_MM
 #include "GlobalShirosMemoryManager.h"
@@ -130,7 +128,6 @@ void CheckStandardBehavior()
 
 int main()
 {
-
 #ifdef MM_TESTS
 	//decomment only with MM_Debug macro disabled	
 	MMPerformanceTest(); 
@@ -214,5 +211,7 @@ int main()
 	ShirosMemoryManager::Get().PrintMemoryState();
 	a.clear();
 #endif
+
 	return 0;
+
 }
