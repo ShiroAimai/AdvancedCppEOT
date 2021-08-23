@@ -46,22 +46,32 @@ private:
 	size_t m_mem_requested = 0;
 	size_t m_mem_freed = 0;
 
+	/** Allocator for SmallObjects */
 	SmallObjAllocator m_smallObjAllocator;
+	/** Allocator for LargeObjects. Large objects are identified by a size_t > MAX_SMALL_OBJ_SIZE*/
 	FreeListAllocator m_freeListAllocator;
 
+	/** 
+	 *  Internal hash map. It is used to track every AllocationType::Collection request. 
+	 *  Its goal is to store the allocated size as a map entry, using its memory address as key.
+	 */
 	std::map<void*, size_t, std::less<void*>, Mallocator<std::pair<void*, size_t>>> m_arrayAllocationMap;
 };
 
-
 inline void* operator new(size_t ObjSize, size_t Alignment, char const* function, char const* file, unsigned long line)
 {
+#ifdef MM_DEBUG
 	cout << "Requested allocation of " << ObjSize << " bytes requested by line " << line << " in function " << function << " in file " << file << endl;
+#endif // MM_DEBUG
+
 	return ShirosMemoryManager::Get().Allocate(ObjSize, ShirosMemoryManager::AllocationType::Single, Alignment);
 }
 
 inline void operator delete(void* ptr, size_t ObjSize, char const* function, char const* file, unsigned long line) noexcept
 {
+#ifdef MM_DEBUG
 	cout << "Requested deallocation of address " << ptr << " requested by line " << line << " in function " << function << " in file " << file << endl;
+#endif
 	ShirosMemoryManager::Get().Deallocate(ptr, ObjSize);
 }
 
@@ -74,6 +84,7 @@ inline void _Delete(T* ptr, size_t Size, char const* function, char const* file,
 		operator delete(static_cast<void*>(ptr), Size, function, file, line);
 	}
 }
+
 template<>
 inline void _Delete<void>(void* ptr, size_t Size, char const* function, char const* file, unsigned long line)
 {
@@ -85,13 +96,17 @@ inline void _Delete<void>(void* ptr, size_t Size, char const* function, char con
 
 inline void* operator new[](size_t ObjSize, size_t Alignment, char const* function, char const* file, unsigned long line)
 {
+#ifdef MM_DEBUG
 	cout << "Requested allocation of array of " << ObjSize << " bytes requested by line " << line << " in function " << function << " in file " << file << endl;
+#endif
 	return ShirosMemoryManager::Get().Allocate(ObjSize, ShirosMemoryManager::AllocationType::Collection, Alignment);
 }
 
 inline void operator delete[](void* ptr, size_t Length, char const* function, char const* file, unsigned long line)
 {
+#ifdef MM_DEBUG
 	cout << "Requested deallocation of array of " << Length << " elements from address " << ptr << " requested by line " << line << " in function " << function << " in file " << file << endl;
+#endif
 	ShirosMemoryManager::Get().Deallocate(ptr); //we do not pass size here because it is already saved inside the internal array allocation map inside the MM
 }
 
@@ -119,13 +134,17 @@ inline void _DeleteArr<void>(void* ptr, size_t Length, char const* function, cha
 
 inline void* _Malloc(size_t ObjSize, char const* function, char const* file, unsigned long line)
 {
+#ifdef MM_DEBUG
 	cout << "Requested allocation of " << ObjSize << " bytes requested by line " << line << " in function " << function << " in file " << file << endl;
+#endif
 	return ShirosMemoryManager::Get().Allocate(ObjSize, ShirosMemoryManager::AllocationType::Single, alignof(std::max_align_t));
 }
 
 inline void _Free(void* ptr, size_t ObjSize, char const* function, char const* file, unsigned long line)
 {
+#ifdef MM_DEBUG
 	cout << "Requested deallocation of " << ObjSize << " bytes from address " << ptr << " requested by line " << line << " in function " << function << " in file " << file << endl;
+#endif
 	ShirosMemoryManager::Get().Deallocate(ptr, ObjSize);
 }
 

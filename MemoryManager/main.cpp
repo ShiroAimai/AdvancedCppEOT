@@ -2,7 +2,9 @@
 
 //TEST MODES
 #define GLOBAL_OP_OVERLOAD
-#define MM_TESTS
+//Execute test in Release configuration in order to have a good comparison between default allocator and custom one
+//Also it is suggested to disable MM_DEBUG macro
+//#define MM_TESTS 
 #define STL_ALLOCATOR
 #define BOTH_ALLOC_USED
 #define ARRAY_TEST
@@ -13,6 +15,8 @@
 #include <ctime>
 #include <chrono>
 #include <cassert>
+
+//#define MM_DEBUG //enable debug logs for MM
 
 #ifdef GLOBAL_OP_OVERLOAD
 #define GLOBAL_SHIRO_MM
@@ -46,30 +50,37 @@ void MMPerformanceTest()
 {
 	cout << "====== MM PERFORMANCE TEST ======" << endl;
 
+	constexpr int TestSize = 1000000;
+	ShirosMemoryManager& Instance = ShirosMemoryManager::Get();
+
+	Instance.PrintMemoryState();
+
 	std::vector<SmallObjTest*> PointersToSmallObjTest;
 	auto start_millisec = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
-	for (int i = 0; i < 1000000; ++i)
+	for (int i = 0; i < TestSize; ++i)
 	{
 		SmallObjTest* ptr = MM_NEW(alignof(SmallObjTest)) SmallObjTest();
 		PointersToSmallObjTest.push_back(ptr);
 	}
-	for (int i = 0; i < 1000000; ++i)
+	Instance.PrintMemoryState();
+	for (int i = 0; i < TestSize; ++i)
 	{
 		MM_DELETE(PointersToSmallObjTest[i], sizeof(SmallObjTest));
 	}
 	auto end_millisec = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 	long long delta = end_millisec - start_millisec;
+	Instance.PrintMemoryState();
 	cout << "SmallObjAllocator takes :" << std::to_string((float)delta / 1000) << " to complete" << endl; //convert to seconds
 
 	std::vector<SmallObjTest*> PointersToSmallObjTest2;
 
 	start_millisec = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
-	for (int i = 0; i < 1000000; ++i)
+	for (int i = 0; i < TestSize; ++i)
 	{
 		SmallObjTest* ptr = new SmallObjTest();
 		PointersToSmallObjTest2.push_back(ptr);
 	}
-	for (int i = 0; i < 1000000; ++i)
+	for (int i = 0; i < TestSize; ++i)
 	{
 		delete PointersToSmallObjTest2[i];
 	}
@@ -121,7 +132,8 @@ int main()
 {
 
 #ifdef MM_TESTS
-	//MMPerformanceTest();
+	//decomment only with MM_Debug macro disabled	
+	MMPerformanceTest(); 
 	CheckMemoryLeak();
 	CheckStandardBehavior();
 #endif

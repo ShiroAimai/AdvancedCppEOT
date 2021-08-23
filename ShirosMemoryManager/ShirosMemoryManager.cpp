@@ -23,6 +23,7 @@ ShirosMemoryManager::~ShirosMemoryManager()
 {
 	cout << "===== RELEASED ALLOCATED MEMORY ======" << endl;
 }
+
 void* ShirosMemoryManager::Allocate(const size_t ObjSize, const AllocationType AllocType, const size_t Alignment /* = alignof(std::max_align_t) */)
 {	
 	void* p_res = nullptr;
@@ -30,19 +31,25 @@ void* ShirosMemoryManager::Allocate(const size_t ObjSize, const AllocationType A
 	if (CanBeHandledWithSmallObjAllocator(ObjSize))
 	{
 		p_res = m_smallObjAllocator.Allocate(ObjSize);
+#ifdef MM_DEBUG
 		cout << "Requested size is less or equal MAX_SMALL_OBJECT_SIZE(" << MAX_SMALL_OBJECT_SIZE << ")";
 		cout << ". Allocated memory using SmallObjAllocator" << endl;
+#endif
 	}
 	else
 	{
 		p_res = m_freeListAllocator.Allocate(ObjSize, Alignment);
+#ifdef MM_DEBUG
 		cout << "Requested size is larger than MAX_SMALL_OBJECT_SIZE(" << MAX_SMALL_OBJECT_SIZE << ")";
 		cout << ". Allocated memory using FreeListAllocator" << endl;
+#endif
 	}
 	
 	if (p_res)
 	{
+#ifdef MM_DEBUG
 		cout << "Allocated " << ObjSize << " bytes from address " << p_res << endl;
+#endif
 		
 		if (AllocType == AllocationType::Collection)
 		{
@@ -91,8 +98,9 @@ void ShirosMemoryManager::Deallocate(void* ptr, size_t ObjSize /* = 0 */)
 	{
 		m_freeListAllocator.Deallocate(ptr);
 	}
-
+#ifdef MM_DEBUG
 	cout << "Deallocated " << ObjSize << " bytes from address " << ptr << endl;
+#endif
 
 	m_mem_used -= ObjSize;
 	m_mem_freed += ObjSize;
