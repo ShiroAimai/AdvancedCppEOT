@@ -30,7 +30,7 @@ public:
 	static size_t CHUNK_SIZE;
 	/** Max size manageable by SmallObjAllocator. Default is 128 bytes */
 	static size_t MAX_SMALL_OBJ_SIZE;
-	/** Memory pool to preallocate for FreeListAllocator. Default is 64Kb */
+	/** Memory pool to preallocate for FreeListAllocator. Default is 1MB */
 	static size_t FREE_LIST_SIZE;
 	/** Fit policy to use for FreeListAllocator. Default is BestFit*/
 	static FreeListAllocator::FitPolicy FREE_LIST_POLICY;

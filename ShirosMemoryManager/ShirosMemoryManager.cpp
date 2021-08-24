@@ -9,7 +9,7 @@ ShirosMemoryManager& ShirosMemoryManager::Get()
 
 size_t ShirosMemoryManager::CHUNK_SIZE = DEFAULT_CHUNK_SIZE;
 size_t ShirosMemoryManager::MAX_SMALL_OBJ_SIZE = MAX_SMALL_OBJECT_SIZE;
-size_t ShirosMemoryManager::FREE_LIST_SIZE = 65536;  // 64 KB
+size_t ShirosMemoryManager::FREE_LIST_SIZE = 1048576;  // 1 MB
 FreeListAllocator::FitPolicy ShirosMemoryManager::FREE_LIST_POLICY = FreeListAllocator::FitPolicy::BEST_FIT;
 
 ShirosMemoryManager::ShirosMemoryManager()
