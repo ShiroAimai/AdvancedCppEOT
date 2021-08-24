@@ -19,7 +19,7 @@ struct ShirosMMCreationParams
 	/** Max size manageable by SmallObjAllocator. Default is 128 bytes */
 	size_t maxSizeForSmallObj = MAX_SMALL_OBJECT_SIZE;
 	/** Memory pool to preallocate for FreeListAllocator. Default is 1MB */
-	size_t freeListMemoryPoolSize = 1048576;  // 1 MB
+	size_t freeListMemoryPoolSize = 67108864;  // 64 MB
 	/** Fit policy to use for FreeListAllocator. Default is BestFit*/
 	FreeListAllocator::FitPolicy freeListFitPolicy = FreeListAllocator::FitPolicy::BEST_FIT;
 };

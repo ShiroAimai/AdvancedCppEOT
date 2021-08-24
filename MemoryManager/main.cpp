@@ -43,13 +43,12 @@ struct LargeObjTest {
 	char b[2048];
 };
 
-void MMPerformanceTest()
+
+void SmallObjAllocPerformanceTest(ShirosMemoryManager& Instance)
 {
-	cout << "====== MM PERFORMANCE TEST ======" << endl;
+	cout << "====== SmallObjects PERFORMANCE TEST ======" << endl;
 
 	constexpr int TestSize = 1000000;
-	ShirosMemoryManager& Instance = ShirosMemoryManager::Get();
-
 	Instance.PrintMemoryState();
 
 	std::vector<SmallObjTest*> PointersToSmallObjTest;
@@ -67,7 +66,7 @@ void MMPerformanceTest()
 	auto end_millisec = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 	long long delta = end_millisec - start_millisec;
 	Instance.PrintMemoryState();
-	cout << "SmallObjAllocator takes :" << std::to_string((float)delta / 1000) << " to complete" << endl; //convert to seconds
+	cout << "ShirosMemoryManager takes :" << std::to_string((float)delta / 1000) << " to complete" << endl; //convert to seconds
 
 	std::vector<SmallObjTest*> PointersToSmallObjTest2;
 
@@ -84,6 +83,62 @@ void MMPerformanceTest()
 	end_millisec = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 	delta = end_millisec - start_millisec;
 	cout << "Default Allocator takes :" << std::to_string((float)delta / 1000) << " to complete" << endl; //convert to seconds
+
+	cout << "====== END OF SmallObjects PERFORMANCE TEST ======" << endl;
+}
+
+void LargeObjAlloctPerformanceTest(ShirosMemoryManager& Instance)
+{
+	cout << "====== LargeObjects PERFORMANCE TEST ======" << endl;
+
+	constexpr int TestSize = 10000;
+	Instance.PrintMemoryState();
+
+	std::vector<LargeObjTest*> PointersToSmallObjTest;
+	auto start_millisec = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+	for (int i = 0; i < TestSize; ++i)
+	{
+		LargeObjTest* ptr = MM_NEW(alignof(LargeObjTest)) LargeObjTest();
+		PointersToSmallObjTest.push_back(ptr);
+	}
+	Instance.PrintMemoryState();
+	for (int i = 0; i < TestSize; ++i)
+	{
+		MM_DELETE(PointersToSmallObjTest[i], sizeof(LargeObjTest));
+	}
+	auto end_millisec = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+	long long delta = end_millisec - start_millisec;
+	Instance.PrintMemoryState();
+	cout << "ShirosMemoryManager takes :" << std::to_string((float)delta / 1000) << " to complete" << endl; //convert to seconds
+
+	std::vector<LargeObjTest*> PointersToSmallObjTest2;
+
+	start_millisec = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+	for (int i = 0; i < TestSize; ++i)
+	{
+		LargeObjTest* ptr = new LargeObjTest();
+		PointersToSmallObjTest2.push_back(ptr);
+	}
+	for (int i = 0; i < TestSize; ++i)
+	{
+		delete PointersToSmallObjTest2[i];
+	}
+	end_millisec = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+	delta = end_millisec - start_millisec;
+	cout << "Default Allocator takes :" << std::to_string((float)delta / 1000) << " to complete" << endl; //convert to seconds
+
+	cout << "====== END OF LargeObjects PERFORMANCE TEST ======" << endl;
+
+}
+
+void MMPerformanceTest()
+{
+	cout << "====== MM PERFORMANCE TEST ======" << endl;
+
+	ShirosMemoryManager& Instance = ShirosMemoryManager::Get();
+
+	SmallObjAllocPerformanceTest(Instance);
+	LargeObjAlloctPerformanceTest(Instance);
 
 	cout << "====== END OF MM PERFORMANCE TEST ======" << endl;
 }
