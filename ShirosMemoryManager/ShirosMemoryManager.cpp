@@ -1,20 +1,22 @@
 #include "pch.h"
 #include "ShirosMemoryManager.h"
 
+ShirosMMCreationParams ShirosMemoryManager::mmCreationParams = ShirosMMCreationParams();
+
 ShirosMemoryManager& ShirosMemoryManager::Get()
 {
 	static ShirosMemoryManager mm;
 	return mm;
 }
 
-size_t ShirosMemoryManager::CHUNK_SIZE = DEFAULT_CHUNK_SIZE;
-size_t ShirosMemoryManager::MAX_SMALL_OBJ_SIZE = MAX_SMALL_OBJECT_SIZE;
-size_t ShirosMemoryManager::FREE_LIST_SIZE = 1048576;  // 1 MB
-FreeListAllocator::FitPolicy ShirosMemoryManager::FREE_LIST_POLICY = FreeListAllocator::FitPolicy::BEST_FIT;
+void ShirosMemoryManager::Init(const ShirosMMCreationParams& params)
+{
+	mmCreationParams = params;
+}
 
 ShirosMemoryManager::ShirosMemoryManager()
-	: m_smallObjAllocator(CHUNK_SIZE),
-	m_freeListAllocator(FREE_LIST_SIZE, FREE_LIST_POLICY)
+	: m_smallObjAllocator(mmCreationParams.chunkSize),
+	m_freeListAllocator(mmCreationParams.freeListMemoryPoolSize, mmCreationParams.freeListFitPolicy)
 {
 
 }
@@ -113,7 +115,7 @@ void ShirosMemoryManager::Deallocate(void* ptr, size_t ObjSize /* = 0 */)
 
 bool ShirosMemoryManager::CanBeHandledWithSmallObjAllocator(size_t ObjSize) const
 {
-	return ObjSize <= MAX_SMALL_OBJECT_SIZE;
+	return ObjSize <= mmCreationParams.maxSizeForSmallObj;
 }
 
 void ShirosMemoryManager::PrintMemoryState()
