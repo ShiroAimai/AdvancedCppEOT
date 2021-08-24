@@ -1,13 +1,14 @@
 #pragma once
 
 //TEST MODES
-#define GLOBAL_OP_OVERLOAD
 //Execute test in Release configuration in order to have a good comparison between default allocator and custom one
 //Also it is suggested to disable MM_DEBUG macro
 //#define MM_TESTS 
-#define STL_ALLOCATOR
-#define BOTH_ALLOC_USED
-#define ARRAY_TEST
+//#define GLOBAL_OP_OVERLOAD
+#define LARGE_OBJ_TEST
+//#define STL_ALLOCATOR
+//#define BOTH_ALLOC_USED
+//#define ARRAY_TEST
 
 #include <iostream>
 #include "ShirosMemoryManager.h"
@@ -167,6 +168,45 @@ int main()
 	delete[] arr2;
 	ShirosMemoryManager::Get().PrintMemoryState();
 
+#endif
+#ifdef LARGE_OBJ_TEST
+	ShirosMemoryManager::Get().PrintMemoryState();
+
+	LargeObjTest* ptr = MM_NEW(alignof(LargeObjTest)) LargeObjTest();
+	LargeObjTest* ptr2 = MM_NEW(alignof(LargeObjTest)) LargeObjTest();
+	LargeObjTest* ptr3 = MM_NEW(alignof(LargeObjTest)) LargeObjTest();
+	LargeObjTest* ptr4 = MM_NEW(alignof(LargeObjTest)) LargeObjTest();
+	LargeObjTest* ptr5 = MM_NEW(alignof(LargeObjTest)) LargeObjTest();
+	LargeObjTest* ptr6 = MM_NEW(alignof(LargeObjTest)) LargeObjTest();
+	LargeObjTest* ptr7 = MM_NEW(alignof(LargeObjTest)) LargeObjTest();
+	LargeObjTest* ptr8 = MM_NEW(alignof(LargeObjTest)) LargeObjTest();
+
+	ShirosMemoryManager::Get().PrintMemoryState();
+	
+	MM_DELETE(ptr, sizeof(LargeObjTest));
+	MM_DELETE(ptr2, sizeof(LargeObjTest));
+	MM_DELETE(ptr3, sizeof(LargeObjTest));
+	MM_DELETE(ptr4, sizeof(LargeObjTest));
+	MM_DELETE(ptr5, sizeof(LargeObjTest));
+	MM_DELETE(ptr6, sizeof(LargeObjTest));
+
+	ShirosMemoryManager::Get().PrintMemoryState();
+
+	LargeObjTest* ptr9 = MM_NEW(alignof(LargeObjTest)) LargeObjTest();
+	LargeObjTest* ptr10 = MM_NEW(alignof(LargeObjTest)) LargeObjTest();
+
+	MM_DELETE(ptr7, sizeof(LargeObjTest));
+	MM_DELETE(ptr8, sizeof(LargeObjTest));
+	MM_DELETE(ptr9, sizeof(LargeObjTest));
+	MM_DELETE(ptr10, sizeof(LargeObjTest));
+
+	LargeObjTest* ptr11= MM_NEW_A(LargeObjTest, 8);
+	LargeObjTest* ptr12 = MM_NEW_A(LargeObjTest, 4);
+
+	MM_DELETE_A(ptr11, 8);
+	MM_DELETE_A(ptr12, 4);
+
+	ShirosMemoryManager::Get().PrintMemoryState();
 #endif
 #ifdef BOTH_ALLOC_USED
 	ShirosMemoryManager::Get().PrintMemoryState();
