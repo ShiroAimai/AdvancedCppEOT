@@ -120,6 +120,7 @@ void FreeListAllocator::Deallocate(void* ptr)
 
 	assert(allocatedBlockHeader != nullptr);
 	assert(allocatedBlockHeader->blockSize >= AllocationHeaderSize);
+
 	const std::size_t AlignmentPadding = static_cast<std::size_t>(allocatedBlockHeader->padding);
 	
 	//retrieve base address subtracting alignmentPadding e allocation header size from ptr
@@ -174,7 +175,7 @@ void FreeListAllocator::FindBest(const std::size_t size, const std::size_t align
 	
 	static constexpr std::size_t AllocationBlockHeaderAlignment = alignof(AllocatedBlockHeader);
 
-	Node* bestBlock = nullptr;
+	Node* bestBlock = nullptr, *prevBest = nullptr;
 	Node* it = m_freeList.head,
 		* prev = nullptr;
 	/** Current smallest difference (blockSize - requiredSize) among all FreeBlock blocks*/
@@ -187,14 +188,14 @@ void FreeListAllocator::FindBest(const std::size_t size, const std::size_t align
 		if (it->data.blockSize >= requiredSpace && ((it->data.blockSize - requiredSpace) < smallestDiff)) {
 			smallestDiff = it->data.blockSize - requiredSpace;
 			bestBlock = it;
+			prevBest = prev;
 		}
 		prev = it;
 	}
 	
-	previousNode = prev == bestBlock ? nullptr : prev; //prevents assignment of the same block
+	previousNode = prevBest;
 	resNode = bestBlock;
 }
-
 
 void FreeListAllocator::FindFirst(const std::size_t size, const std::size_t alignment, std::size_t& padding, Node*& previousNode, Node*& resNode)
 {
