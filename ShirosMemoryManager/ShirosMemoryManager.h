@@ -55,6 +55,7 @@ private:
 	size_t m_mem_allocated = 0;
 	size_t m_mem_freed = 0;
 
+	//TODO : Refactor allocator instances. Maybe making a common allocator interface?
 	/** Allocator for SmallObjects */
 	SmallObjAllocator m_smallObjAllocator;
 	/** Allocator for LargeObjects. Large objects are identified by a size_t > MAX_SMALL_OBJ_SIZE*/

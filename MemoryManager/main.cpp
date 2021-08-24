@@ -1,9 +1,7 @@
 #pragma once
 
 //TEST MODES
-//Execute test in Release configuration in order to have a good comparison between default allocator and custom one
-//Also it is suggested to disable MM_DEBUG macro
-//#define MM_TESTS 
+#define MM_TESTS 
 #define GLOBAL_OP_OVERLOAD
 #define LARGE_OBJ_TEST
 #define STL_ALLOCATOR
@@ -130,8 +128,10 @@ void CheckStandardBehavior()
 int main()
 {
 #ifdef MM_TESTS
-	//decomment only with MM_Debug macro disabled	
-	MMPerformanceTest(); 
+	/* To properly check this test results disable macro GLOBAL_OP_OVERLOAD
+	 * Execute test in Release configuration in order to have a good comparison between default allocator and custom one
+	*/
+	//MMPerformanceTest(); 
 	CheckMemoryLeak();
 	CheckStandardBehavior();
 #endif
