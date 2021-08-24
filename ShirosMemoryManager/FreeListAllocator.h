@@ -12,8 +12,8 @@ public:
 	FreeListAllocator(const std::size_t TotalSize, const FitPolicy policy);
 	virtual ~FreeListAllocator();
 
-	void* Allocate(const std::size_t AllocationSize, const std::size_t alignment);
-	void Deallocate(void* ptr);
+	void* Allocate(const std::size_t AllocationSize, const std::size_t alignment, size_t& OutAllocationSize);
+	size_t Deallocate(void* ptr);
 	void Reset();
 
 	inline size_t GetTotalAllocatedMemory() const { return m_totalSizeAllocated; }

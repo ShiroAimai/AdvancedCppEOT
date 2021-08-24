@@ -4,11 +4,11 @@
 //Execute test in Release configuration in order to have a good comparison between default allocator and custom one
 //Also it is suggested to disable MM_DEBUG macro
 //#define MM_TESTS 
-//#define GLOBAL_OP_OVERLOAD
+#define GLOBAL_OP_OVERLOAD
 #define LARGE_OBJ_TEST
-//#define STL_ALLOCATOR
-//#define BOTH_ALLOC_USED
-//#define ARRAY_TEST
+#define STL_ALLOCATOR
+#define BOTH_ALLOC_USED
+#define ARRAY_TEST
 
 #include <iostream>
 #include "ShirosMemoryManager.h"
@@ -172,39 +172,39 @@ int main()
 #ifdef LARGE_OBJ_TEST
 	ShirosMemoryManager::Get().PrintMemoryState();
 
-	LargeObjTest* ptr = MM_NEW(alignof(LargeObjTest)) LargeObjTest();
-	LargeObjTest* ptr2 = MM_NEW(alignof(LargeObjTest)) LargeObjTest();
-	LargeObjTest* ptr3 = MM_NEW(alignof(LargeObjTest)) LargeObjTest();
-	LargeObjTest* ptr4 = MM_NEW(alignof(LargeObjTest)) LargeObjTest();
-	LargeObjTest* ptr5 = MM_NEW(alignof(LargeObjTest)) LargeObjTest();
-	LargeObjTest* ptr6 = MM_NEW(alignof(LargeObjTest)) LargeObjTest();
-	LargeObjTest* ptr7 = MM_NEW(alignof(LargeObjTest)) LargeObjTest();
-	LargeObjTest* ptr8 = MM_NEW(alignof(LargeObjTest)) LargeObjTest();
+	LargeObjTest* l_ptr = MM_NEW(alignof(LargeObjTest)) LargeObjTest();
+	LargeObjTest* l_ptr2 = MM_NEW(alignof(LargeObjTest)) LargeObjTest();
+	LargeObjTest* l_ptr3 = MM_NEW(alignof(LargeObjTest)) LargeObjTest();
+	LargeObjTest* l_ptr4 = MM_NEW(alignof(LargeObjTest)) LargeObjTest();
+	LargeObjTest* l_ptr5 = MM_NEW(alignof(LargeObjTest)) LargeObjTest();
+	LargeObjTest* l_ptr6 = MM_NEW(alignof(LargeObjTest)) LargeObjTest();
+	LargeObjTest* l_ptr7 = MM_NEW(alignof(LargeObjTest)) LargeObjTest();
+	LargeObjTest* l_ptr8 = MM_NEW(alignof(LargeObjTest)) LargeObjTest();
 
 	ShirosMemoryManager::Get().PrintMemoryState();
 	
-	MM_DELETE(ptr, sizeof(LargeObjTest));
-	MM_DELETE(ptr2, sizeof(LargeObjTest));
-	MM_DELETE(ptr3, sizeof(LargeObjTest));
-	MM_DELETE(ptr4, sizeof(LargeObjTest));
-	MM_DELETE(ptr5, sizeof(LargeObjTest));
-	MM_DELETE(ptr6, sizeof(LargeObjTest));
+	MM_DELETE(l_ptr, sizeof(LargeObjTest));
+	MM_DELETE(l_ptr2, sizeof(LargeObjTest));
+	MM_DELETE(l_ptr3, sizeof(LargeObjTest));
+	MM_DELETE(l_ptr4, sizeof(LargeObjTest));
+	MM_DELETE(l_ptr5, sizeof(LargeObjTest));
+	MM_DELETE(l_ptr6, sizeof(LargeObjTest));
 
 	ShirosMemoryManager::Get().PrintMemoryState();
 
-	LargeObjTest* ptr9 = MM_NEW(alignof(LargeObjTest)) LargeObjTest();
-	LargeObjTest* ptr10 = MM_NEW(alignof(LargeObjTest)) LargeObjTest();
+	LargeObjTest* l_ptr9 = MM_NEW(alignof(LargeObjTest)) LargeObjTest();
+	LargeObjTest* l_ptr10 = MM_NEW(alignof(LargeObjTest)) LargeObjTest();
 
-	MM_DELETE(ptr7, sizeof(LargeObjTest));
-	MM_DELETE(ptr8, sizeof(LargeObjTest));
-	MM_DELETE(ptr9, sizeof(LargeObjTest));
-	MM_DELETE(ptr10, sizeof(LargeObjTest));
+	MM_DELETE(l_ptr7, sizeof(LargeObjTest));
+	MM_DELETE(l_ptr8, sizeof(LargeObjTest));
+	MM_DELETE(l_ptr9, sizeof(LargeObjTest));
+	MM_DELETE(l_ptr10, sizeof(LargeObjTest));
 
-	LargeObjTest* ptr11= MM_NEW_A(LargeObjTest, 8);
-	LargeObjTest* ptr12 = MM_NEW_A(LargeObjTest, 4);
+	LargeObjTest* l_ptr11= MM_NEW_A(LargeObjTest, 8);
+	LargeObjTest* l_ptr12 = MM_NEW_A(LargeObjTest, 4);
 
-	MM_DELETE_A(ptr11, 8);
-	MM_DELETE_A(ptr12, 4);
+	MM_DELETE_A(l_ptr11, 8);
+	MM_DELETE_A(l_ptr12, 4);
 
 	ShirosMemoryManager::Get().PrintMemoryState();
 #endif

@@ -44,7 +44,7 @@ public:
 	void PrintMemoryState();
 
 	inline const size_t GetCurrentlyUsedMemory() { return m_mem_used; }
-	inline const size_t GetMemoryRequested() { return m_mem_requested; }
+	inline const size_t GetMemoryRequested() { return m_mem_allocated; }
 	inline const size_t GetMemoryFreed() { return m_mem_freed; }
 private:
 	ShirosMemoryManager();
@@ -52,7 +52,7 @@ private:
 	bool CanBeHandledWithSmallObjAllocator(size_t ObjSize) const;
 
 	size_t m_mem_used = 0;
-	size_t m_mem_requested = 0;
+	size_t m_mem_allocated = 0;
 	size_t m_mem_freed = 0;
 
 	/** Allocator for SmallObjects */

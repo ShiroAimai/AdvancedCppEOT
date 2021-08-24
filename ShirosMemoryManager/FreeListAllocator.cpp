@@ -62,7 +62,7 @@ void FreeListAllocator::Reset()
 	m_freeList.insert(nullptr, head);
 }
 
-void* FreeListAllocator::Allocate(const std::size_t AllocationSize, const std::size_t alignment)
+void* FreeListAllocator::Allocate(const std::size_t AllocationSize, const std::size_t alignment, size_t& OutAllocationSize)
 {
 	assert(AllocationSize > 0 && alignment > 0 && "Allocation Size and Alignment must be positive");
 	
@@ -105,10 +105,11 @@ void* FreeListAllocator::Allocate(const std::size_t AllocationSize, const std::s
 
 	assert(isAligned(AllocatedBlockHeaderAddress, alignof(AllocatedBlockHeader)));
 
+	OutAllocationSize = requiredSize;
 	return reinterpret_cast<void*>(dataAddress);
 }
 
-void FreeListAllocator::Deallocate(void* ptr)
+size_t FreeListAllocator::Deallocate(void* ptr)
 {
 	static constexpr std::size_t AllocationHeaderSize = sizeof(AllocatedBlockHeader);
 	
@@ -122,10 +123,11 @@ void FreeListAllocator::Deallocate(void* ptr)
 	assert(allocatedBlockHeader->blockSize >= AllocationHeaderSize);
 
 	const std::size_t AlignmentPadding = static_cast<std::size_t>(allocatedBlockHeader->padding);
-	
+	const std::size_t DeallocationSize = allocatedBlockHeader->blockSize;
+
 	//retrieve base address subtracting alignmentPadding e allocation header size from ptr
 	Node* freeNode = reinterpret_cast<Node*>(allocatedBlockHeaderAddress - AlignmentPadding);
-	freeNode->data.blockSize = allocatedBlockHeader->blockSize; //take back allocated size
+	freeNode->data.blockSize = DeallocationSize; //take back allocated size
 	freeNode->next = nullptr;
 
 	//iterate and insert the new free node back in the correct position inside the free list
@@ -139,6 +141,8 @@ void FreeListAllocator::Deallocate(void* ptr)
 	}
 	//try to merge contiguous nodes into a unique free block
 	Coalescence(prev, freeNode);
+
+	return DeallocationSize;
 }
 
 void FreeListAllocator::Coalescence(Node* prevBlock, Node* freeBlock)

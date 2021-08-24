@@ -20,8 +20,10 @@ SmallObjAllocator::~SmallObjAllocator()
 	}
 }
 
-void* SmallObjAllocator::Allocate(const size_t bytes)
+void* SmallObjAllocator::Allocate(const size_t bytes, size_t& OutAllocatedMemory)
 {
+	OutAllocatedMemory = bytes; //we allocate just the right amount of memory
+
 	//check if we already allocated an allocator, and if this one manage Chunk of the desired size
 	if (m_lastAllocatorUsedForAllocation && m_lastAllocatorUsedForAllocation->GetBlockSize() == bytes)
 	{
@@ -48,14 +50,14 @@ void* SmallObjAllocator::Allocate(const size_t bytes)
 	return p_res;
 }
 
-void SmallObjAllocator::Deallocate(void* p_obj, const size_t size_obj)
+size_t SmallObjAllocator::Deallocate(void* p_obj, const size_t size_obj)
 {
 	//check if the last time we deallocated something from an allocator, and if that allocator is of the desired size
 	//if it is, then use that one
 	if (m_lastAllocatorUsedForDeallocation && m_lastAllocatorUsedForDeallocation->GetBlockSize() == size_obj)
 	{
 		m_lastAllocatorUsedForDeallocation->Deallocate(p_obj);
-		return;
+		return size_obj;
 	}
 	//find the allocator used to allocate the object requested to release
 	AllocatorPool::iterator it = std::lower_bound(m_Pool.begin(), m_Pool.end(), size_obj, FixedAllocatorComparator);
@@ -65,6 +67,8 @@ void SmallObjAllocator::Deallocate(void* p_obj, const size_t size_obj)
 	assert(it->GetBlockSize() == size_obj);
 	m_lastAllocatorUsedForDeallocation = &*it;
 	m_lastAllocatorUsedForDeallocation->Deallocate(p_obj);
+
+	return size_obj; //we deallocate just the right amount
 }
 
 void SmallObjAllocator::Reset()

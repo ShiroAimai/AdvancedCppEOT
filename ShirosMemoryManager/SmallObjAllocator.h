@@ -13,8 +13,31 @@ public:
 	SmallObjAllocator(const size_t chunkSize);
 	virtual ~SmallObjAllocator();
 
-	void* Allocate(const size_t bytes);
-	void Deallocate(void* p_obj, const size_t size_obj);
+	/**
+	 *	Allocates memory for SmallObjects
+	 *
+	 *@author Nicola Cisternino
+	 *
+	 *
+	 *@param bytes - Requested allocation size
+	 *@param OutAllocatedMemory - Effective memory size allocated
+	 *
+	 *@return A pointer to the memory address from which memory was allocated
+	 * 
+	 */
+	void* Allocate(const size_t bytes, size_t& OutAllocatedMemory);
+	/**
+	 *	Deallocates memory for SmallObjects
+	 *
+	 *@author Nicola Cisternino
+	 *
+	 *@param p_obj - Pointer to memory address from which deallocate
+	 *@param size_obj - Requested size to be deallocated
+	 *
+	 *@return A pointer to the memory address from which memory was allocated
+	 *
+	 */
+	size_t Deallocate(void* p_obj, const size_t size_obj);
 
 	void Reset();
 	inline size_t GetTotalAllocatedMemory() const { return m_totMemoryAllocated; }
