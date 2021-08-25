@@ -873,10 +873,10 @@ int main()
 	{
 		cout << "======== MERGE ========" << endl;
 
-		SList<int> l1{ 16, 1, 5, 2, 9};
+		SList<int> l1{ 1,2, 5, 9, 16};
 		cout << "List1 ";
 		print(l1.cbegin(), l1.cend());
-		SList<int> l2{ 3, 4, 12, 7, 8};
+		SList<int> l2{ 3, 4, 7, 8, 12};
 		cout << "List2 ";
 		print(l2.cbegin(), l2.cend());
 		
@@ -904,14 +904,53 @@ int main()
 
 		cout << endl;
 	}
+	//MERGE WITH NOT ORDERED LISTS
+	{
+		cout << "======== MERGE WITH NOT ALREADY SORTED LISTS ========" << endl;
+
+		SList<int> l1{ 1, 16, 9, 5, 2 };
+		cout << "List1 ";
+		print(l1.cbegin(), l1.cend());
+		SList<int> l2{ 3, 7, 4, 12, 8 };
+		cout << "List2 ";
+		print(l2.cbegin(), l2.cend());
+
+		l1.merge(l2);
+
+		assert(l2.empty());
+
+		cout << "Result: ";
+		print(l1.cbegin(), l1.cend());
+
+		SList<int> expected{ 1, 2, 3, 4, 5, 7, 8, 9, 12, 16 };
+
+		cout << "Expected Result: ";
+		print(expected.cbegin(), expected.cend());
+		
+		SList<int>::const_iterator cit = l1.cbegin();
+		SList<int>::const_iterator citExpected = expected.cbegin();
+
+		bool bIsResultSorted = true;
+		for (;bIsResultSorted && cit != l1.cend() && citExpected != expected.cend(); ++cit, ++citExpected)
+		{
+			bIsResultSorted = *cit == *citExpected;
+		}
+
+		assert(!bIsResultSorted);
+		
+		cout << "Result Is " << (!bIsResultSorted ? "Not Sorted" : "Sorted") << endl;
+		cout << "Expected Result Is Sorted" << endl;;
+		
+		cout << endl;
+	}
 	//MERGE MOVE
 	{
 		cout << "======== MERGE MOVE ========" << endl;
 
-		SList<int> l1{ 16, 1, 5, 2, 9 };
+		SList<int> l1{ 1,2, 5, 9, 16 };
 		cout << "List1 ";
 		print(l1.cbegin(), l1.cend());
-		SList<int> l2{ 3, 4, 12, 7, 8 };
+		SList<int> l2{ 3, 4, 7, 8, 12 };
 		cout << "List2 ";
 		print(l2.cbegin(), l2.cend());
 

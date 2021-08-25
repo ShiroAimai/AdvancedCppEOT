@@ -212,7 +212,6 @@ public:
 	void merge(SList&& other, Comparator comp);
 private:
 	iterator before_head; //iterator to the element in list that precedes the first
-	iterator tail; //iterator to the last element in list
 
 	/** Compute the size of a sublist starting from to the end of the list */
 	SList::size_type list_size_from(const_iterator start) const;
