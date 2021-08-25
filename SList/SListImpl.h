@@ -30,8 +30,7 @@ void SList<T>::merge_sort(iterator& it, Comparator comp)
 		++it_half_list; 
 	}
 
-	const_iterator cit_low_half_list_end = it_half_list;
-	++it_half_list;
+	const_iterator cit_low_half_list_end = it_half_list++;
 	cit_low_half_list_end.m_ptr->Next = nullptr; //split half lists
 
 	merge_sort(it, comp);
@@ -150,16 +149,14 @@ typename SList<T>::const_iterator SList<T>::cbefore_begin() const noexcept
 template<class T>
 typename SList<T>::iterator SList<T>::begin() noexcept
 {
-	iterator begin = before_head;
-	++begin;
+	iterator begin = std::next(before_head);
 	return begin;
 }
 
 template<class T>
 typename SList<T>::const_iterator SList<T>::cbegin() const noexcept
 {
-	const_iterator cbegin = cbefore_begin();
-	cbegin++;
+	const_iterator cbegin = std::next(before_head);
 	return cbegin;
 }
 
@@ -344,8 +341,7 @@ template<class T>
 typename SList<T>::iterator SList<T>::insert_after(const_iterator position, const value_type& val)
 {
 	iterator prevIt(position.m_ptr);
-	const_iterator NextPos = position;
-	++NextPos;
+	const_iterator NextPos = std::next(position);
 
 	Node* NewEl = new Node(val, NextPos.m_ptr);
 	prevIt.m_ptr->Next = NewEl;
@@ -362,8 +358,7 @@ template<class T>
 typename SList<T>::iterator SList<T>::insert_after(const_iterator position, value_type&& val)
 {
 	iterator prevIt = iterator(position.m_ptr);
-	const_iterator NextPos = position;
-	++NextPos;
+	const_iterator NextPos = std::next(position);
 
 	Node* NewEl = new Node();
 	NewEl->info = std::move(val);
@@ -412,8 +407,7 @@ template<class T>
 typename SList<T>::iterator SList<T>::erase_after(const_iterator position)
 {
 	const_iterator prevIt = position;
-	const_iterator it = position;
-	++it;
+	const_iterator it = std::next(position);
 
 	//if element to erase is current tail then new tail is prev
 	if (it == tail) 
@@ -542,8 +536,7 @@ void SList<T>::reverse() noexcept
 
 	if (it == end() || it == tail) return; //there's nothing to reverse
 
-	iterator prevIt = it;
-	++it;
+	iterator prevIt = it++;
 	prevIt.m_ptr->Next = nullptr;
 	tail = prevIt;
 
@@ -569,8 +562,8 @@ template<class T>
 void SList<T>::unique()
 {
 	SList<T>::iterator it = begin();
-	SList<T>::iterator lastIt = it;
-	++it;
+	SList<T>::iterator lastIt = it++;
+	
 	for (; it != end();)
 	{
 		if (*lastIt == *it)
@@ -590,8 +583,7 @@ template<class BinaryPredicate>
 void SList<T>::unique(BinaryPredicate binary_pred)
 {
 	SList<T>::iterator it = begin();
-	SList<T>::iterator lastIt = it;
-	++it;
+	SList<T>::iterator lastIt = it++;
 
 	for (; it != end();)
 	{

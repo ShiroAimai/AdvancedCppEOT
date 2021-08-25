@@ -788,8 +788,7 @@ int main()
 		cout << "List2 ";
 		print(l2.cbegin(), l2.cend());
 
-		SList<int>::const_iterator it = l1.cbegin();
-		++it;
+		SList<int>::const_iterator it = std::next(l1.cbegin());
 
 		l1.splice_after(it, std::move(l2));
 

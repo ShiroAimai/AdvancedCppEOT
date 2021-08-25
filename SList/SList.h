@@ -46,8 +46,10 @@ public:
 		friend class SList;
 
 		using iterator_category = std::forward_iterator_tag;
-		using it_pointer = typename std::conditional_t< IsConst, value_type const*, value_type*>;
-		using it_reference = typename std::conditional_t< IsConst, value_type const&, value_type&>;
+		using value_type = SList::value_type;
+		using difference_type = SList::difference_type;
+		using pointer = typename std::conditional_t< IsConst, value_type const*, value_type*>;
+		using reference = typename std::conditional_t< IsConst, value_type const&, value_type&>;
 
 		Iterator(Node* ptr) : m_ptr(ptr) {};
 		Iterator(const Iterator<IsConst>& other) : m_ptr(other.m_ptr) {};
@@ -72,13 +74,13 @@ public:
 
 		//USE SFINAE TO FILTER OPERATOR SIGNATURES
 		template< bool _Const = IsConst >
-		std::enable_if_t< _Const, it_reference > operator*() const { return (*m_ptr).info; };
+		std::enable_if_t< _Const, reference > operator*() const { return (*m_ptr).info; };
 		template< bool _Const = IsConst >
-		std::enable_if_t< !_Const, it_reference > operator*() { return (*m_ptr).info; };
+		std::enable_if_t< !_Const, reference > operator*() { return (*m_ptr).info; };
 		template< bool _Const = IsConst >
-		std::enable_if_t< _Const, it_pointer > operator->() const { return &(m_ptr->info); };
+		std::enable_if_t< _Const, pointer > operator->() const { return &(m_ptr->info); };
 		template< bool _Const = IsConst >
-		std::enable_if_t< !_Const, it_pointer > operator->() { return &(m_ptr->info); };
+		std::enable_if_t< !_Const, pointer > operator->() { return &(m_ptr->info); };
 
 		// Prefix increment
 		Iterator& operator++()
