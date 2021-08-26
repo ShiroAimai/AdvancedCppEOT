@@ -37,43 +37,31 @@ void SList<T>::merge_sort(iterator& it, Comparator comp)
 	merge_sort(it_half_list, comp);
 
 	//merge sorted sub_lists
-	iterator itSorted(nullptr);
-	if (comp(*it, *it_half_list))
-	{
-		itSorted = it;
-		++it;
-	}
-	else
-	{
-		itSorted = it_half_list;
-		++it_half_list;
-	}
+	iterator itSorted = comp(*it, *it_half_list) ? it++ : it_half_list++;
 
 	iterator StartSortedList = itSorted;
 	const_iterator cend = nullptr;
 
-	for (; it != cend && it_half_list != cend;)
+	for (; it != cend; ++itSorted)
 	{
+		if (it_half_list == cend)
+		{
+			itSorted.m_ptr->Next = it.m_ptr;
+			break;
+		}
 		if (comp(*it, *it_half_list))
 		{
 			itSorted.m_ptr->Next = it.m_ptr;
-			++itSorted;
 			++it;
 		}
 		else
 		{
 			itSorted.m_ptr->Next = it_half_list.m_ptr;
-			++itSorted;
 			++it_half_list;
 		}
 	}
 
-	//check if sublists were of different length, if yes add in queue
-	if (it != cend)
-	{
-		itSorted.m_ptr->Next = it.m_ptr;
-	}
-	else if(it_half_list != cend)
+	if(it == cend)
 	{
 		itSorted.m_ptr->Next = it_half_list.m_ptr;
 	}
@@ -82,6 +70,7 @@ void SList<T>::merge_sort(iterator& it, Comparator comp)
 }
 
 #pragma endregion
+
 template<class T>
 SList<T>::SList() : before_head(new Node())
 {
@@ -128,7 +117,7 @@ SList<T>::SList(const SList& list) : SList()
 }
 
 template<class T>
-SList<T>::SList(SList&& list) : before_head(nullptr)
+SList<T>::SList(SList&& list) : before_head()
 {
 	std::swap(before_head, list.before_head);
 }
@@ -574,7 +563,7 @@ void SList<T>::splice_after(const_iterator position, SList& other)
 	if (this == &other) return; //splicing the same list
 
 	Node* PrevNextElement = position.m_ptr->Next; //element next to position
-	position.m_ptr->Next = other.before_head.m_ptr->Next; //attach other first element next to position
+	position.m_ptr->Next = other.begin().m_ptr; //attach other first element next to position
 	
 	//reset other
 	other.before_head.m_ptr->Next = nullptr; 
@@ -591,65 +580,54 @@ void SList<T>::splice_after(const_iterator position, SList& other)
 template<class T>
 void SList<T>::splice_after(const_iterator position, SList&& other)
 {
-	if (this == &other) return; //splicing the same list
-	
-	Node* PrevNextElement = position.m_ptr->Next; //element next to position
-	position.m_ptr->Next = std::move(other.before_head.m_ptr->Next); //moving other first element next to position
-	
-	//reset other
-	other.before_head.m_ptr->Next = nullptr;
-
-	const_iterator it = position;
-	while (it.m_ptr->Next != nullptr)
-	{
-		++it;
-	}
-
-	it.m_ptr->Next = PrevNextElement;
+	splice_after(position, other);
 }
 
-/*
+
 template<class T>
 void SList<T>::splice_after(const_iterator position, SList& other, const_iterator i)
 {
-	Node* OtherElementToMove = i.m_ptr->Next;
-	Node* PrevNextElement = position.m_ptr->Next;
+	const_iterator OtherElementToMove = std::next(i);
 
-	if(OtherElementToMove)
-	{
-		position.m_ptr->Next = OtherElementToMove; //attach other element at i
-		i.m_ptr->Next = OtherElementToMove->Next;
-		OtherElementToMove->Next = PrevNextElement;
-	}
-	else
-	{
-		i.m_ptr->Next = nullptr; //if OtherElementToMove was the last element in other, then i is the new last element
-	}
+	if(position == cend() || OtherElementToMove == other.cend()) return; //if i is iterator to last element then we're done 
+
+	const_iterator PrevNextElement = std::next(position);
+	
+	i.m_ptr->Next = OtherElementToMove.m_ptr->Next; //detach element following i from other
+
+	position.m_ptr->Next = OtherElementToMove.m_ptr;
+	OtherElementToMove.m_ptr->Next = PrevNextElement.m_ptr;
 }
 
 template<class T>
 void SList<T>::splice_after(const_iterator position, SList&& other, const_iterator i)
 {
-	Node* OtherElementToMove = i.m_ptr->Next;
-	Node* PrevNextElement = position.m_ptr->Next;
-
-	if (OtherElementToMove)
-	{
-		position.m_ptr->Next = OtherElementToMove; //attach other element at i
-		i.m_ptr->Next = OtherElementToMove->Next;
-		OtherElementToMove->Next = PrevNextElement;
-	}
-	else
-	{
-		i.m_ptr->Next = nullptr; //if OtherElementToMove was the last element in other, then i is the new last element
-	}
+	splice_after(position, other, i);
 }
 
 template<class T>
-void SList<T>::splice_after(const_iterator position, SList& other, const_iterator first, const_iterator last);
+void SList<T>::splice_after(const_iterator position, SList& other, const_iterator first, const_iterator last)
+{
+	if(position == cend()) return; //invalid iterator
+	const_iterator OriginalPositionNextElement = std::next(position);
+	const_iterator cit = std::next(first);
+	
+	first.m_ptr->Next = last.m_ptr; //reconfigure other
+	
+	for (; cit != last; ++position, ++cit)
+	{
+		position.m_ptr->Next = cit.m_ptr;	
+	}
+
+	position.m_ptr->Next = OriginalPositionNextElement.m_ptr;
+}
+
 template<class T>
-void SList<T>::splice_after(const_iterator position, SList&& other, const_iterator first, const_iterator last);
-*/
+void SList<T>::splice_after(const_iterator position, SList&& other, const_iterator first, const_iterator last)
+{
+	splice_after(position, other, first, last);
+}
+
 template<class T>
 void SList<T>::sort()
 {
@@ -664,7 +642,6 @@ void SList<T>::sort(Comparator comp)
 	merge_sort(NewBegin, comp);
 	before_head.m_ptr->Next = NewBegin.m_ptr;
 }
-
 
 template<class T>
 void SList<T>::merge(SList& other)
@@ -692,36 +669,56 @@ void SList<T>::merge(SList& other, Comparator comp)
 	const_iterator citSorted = cbefore_begin();
 	const_iterator cend = nullptr;
 
-	for (; cit != cend && cOtherIt != cend;)
+	for (; cit != cend; ++citSorted)
 	{
+		if (cOtherIt == cend) {
+			citSorted.m_ptr->Next = cit.m_ptr;
+			return;
+		}
 		if (comp(*cit, *cOtherIt))
 		{
 			citSorted.m_ptr->Next = cit.m_ptr;
-			++citSorted;
 			++cit;
 		}
 		else
 		{
 			citSorted.m_ptr->Next = cOtherIt.m_ptr;
-			++citSorted;
 			++cOtherIt;
 		}
 	}
-
-	//check if sublists were of different length, if yes add in queue
-	if (cit != cend)
-	{
-		citSorted.m_ptr->Next = cit.m_ptr;
-	}
-	else if (cOtherIt != cend)
-	{
-		citSorted.m_ptr->Next = cOtherIt.m_ptr;
-	}
+	citSorted.m_ptr->Next = cOtherIt.m_ptr;
 }
 
 template<class T>
 template<class Comparator>
 void SList<T>::merge(SList&& other, Comparator comp)
 {
-	merge(other, comp);
+	const_iterator cit = cbegin();
+	const_iterator cOtherIt = other.cbegin();
+
+	//detach lists
+	before_head.m_ptr->Next = nullptr;
+	other.before_head.m_ptr->Next = nullptr;
+
+	const_iterator citSorted = cbefore_begin();
+	const_iterator cend = nullptr;
+
+	for (; cit != cend; ++citSorted)
+	{
+		if (cOtherIt == cend) {
+			citSorted.m_ptr->Next = cit.m_ptr;
+			return;
+		}
+		if (comp(*cit, *cOtherIt))
+		{
+			citSorted.m_ptr->Next = cit.m_ptr;
+			++cit;
+		}
+		else
+		{
+			citSorted.m_ptr->Next = cOtherIt.m_ptr;
+			++cOtherIt;
+		}
+	}
+	citSorted.m_ptr->Next = cOtherIt.m_ptr;
 }

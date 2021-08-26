@@ -814,6 +814,49 @@ int main()
 
 		cout << endl;
 	}
+	//SPLICE RANGE
+	{
+		cout << "======== SPLICE RANGE ========" << endl;
+
+		SList<int> l1{ 1, 2, 8, 9, 10 };
+		cout << "List1 ";
+		print(l1.cbegin(), l1.cend());
+
+		SList<int> l2{ 3, 4, 5, 6, 7 };
+		cout << "List2 ";
+		print(l2.cbegin(), l2.cend());
+
+		SList<int>::const_iterator it = l2.cbegin();
+		SList<int>::const_iterator endIt = std::next(it);
+		for (int i = 0; i < 2; ++i)
+		{
+			++endIt;
+		}
+		
+		l1.splice_after(l1.cbegin(), l2, it, endIt);
+		cout << "List2 now is: ";
+		print(l2.cbegin(), l2.cend());
+
+		cout << "Result: ";
+		print(l1.cbegin(), l1.cend());
+
+		SList<int> expected{ 1, 4, 5, 2, 8, 9, 10 };
+
+		cout << "Expected Result: ";
+		print(expected.cbegin(), expected.cend());
+
+		SList<int>::const_iterator cit = l1.cbegin();
+		SList<int>::const_iterator citExpected = expected.cbegin();
+
+		for (; cit != l1.cend() && citExpected != expected.cend(); ++cit, ++citExpected)
+		{
+			assert(*cit == *citExpected);
+		}
+
+		assert(cit == l1.cend() && citExpected == expected.cend());
+
+		cout << endl;
+	}
 	//SORT
 	{
 		cout << "======== SORT ========" << endl;

@@ -51,6 +51,7 @@ public:
 		using pointer = typename std::conditional_t< IsConst, value_type const*, value_type*>;
 		using reference = typename std::conditional_t< IsConst, value_type const&, value_type&>;
 
+		Iterator() : m_ptr(nullptr) {};
 		Iterator(Node* ptr) : m_ptr(ptr) {};
 		Iterator(const Iterator<IsConst>& other) : m_ptr(other.m_ptr) {};
 		operator Iterator<true>() const { 
@@ -193,12 +194,10 @@ public:
 
 	void splice_after(const_iterator position, SList& other);
 	void splice_after(const_iterator position, SList&& other);
-
-	//TODO void splice_after(const_iterator position, SList& other, const_iterator i);
-	//TODO void splice_after(const_iterator position, SList&& other, const_iterator i);
-
-	//TODO void splice_after(const_iterator position, SList& other, const_iterator first, const_iterator last);
-	//TODO void splice_after(const_iterator position, SList&& other, const_iterator first, const_iterator last);
+	void splice_after(const_iterator position, SList& other, const_iterator i);
+	void splice_after(const_iterator position, SList&& other, const_iterator i);
+	void splice_after(const_iterator position, SList& other, const_iterator first, const_iterator last);
+	void splice_after(const_iterator position, SList&& other, const_iterator first, const_iterator last);
 
 	void sort();
 	template<class Comparator>
