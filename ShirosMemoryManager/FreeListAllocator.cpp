@@ -145,7 +145,7 @@ size_t FreeListAllocator::Deallocate(void* ptr)
 
 	return DeallocationSize;
 }
-
+ 
 void FreeListAllocator::Coalescence(Node* prevBlock, Node* freeBlock)
 {
 	if (freeBlock->next != nullptr && (reinterpret_cast<std::size_t>(freeBlock) + freeBlock->data.blockSize) == reinterpret_cast<std::size_t>(freeBlock->next))
@@ -178,8 +178,6 @@ void FreeListAllocator::FindBest(const std::size_t size, const std::size_t align
 {
 	// Iterate the whole list and return a ptr with the best fit
 	
-	//static constexpr std::size_t AllocationBlockHeaderAlignment = alignof(AllocatedBlockHeader);
-
 	Node* bestBlock = nullptr, *prevBest = nullptr;
 	Node* it = m_freeList.head,
 		* prev = nullptr;
@@ -187,7 +185,6 @@ void FreeListAllocator::FindBest(const std::size_t size, const std::size_t align
 	std::size_t smallestDiff = std::numeric_limits<std::size_t>::max();
 	for (; it != nullptr; it = it->next)
 	{
-		//const std::size_t InAlignment = std::max(AllocationBlockHeaderAlignment, alignment);
 		padding = ComputePaddingWithHeader(reinterpret_cast<std::size_t>(it), alignment, sizeof(AllocatedBlockHeader));
 		const std::size_t requiredSpace = size + padding;
 		if (it->data.blockSize >= requiredSpace && ((it->data.blockSize - requiredSpace) < smallestDiff)) {
@@ -207,11 +204,8 @@ void FreeListAllocator::FindFirst(const std::size_t size, const std::size_t alig
 	//just iterate list and return first node that can handle a new block of size "size"
 	Node* it = m_freeList.head, * prev = nullptr;
 
-	//static constexpr std::size_t AllocationBlockHeaderAlignment = alignof(AllocatedBlockHeader);
-
 	for (; it != nullptr; it = it->next)
 	{
-		//const std::size_t InAlignment = std::max(AllocationBlockHeaderAlignment, alignment);
 		padding = ComputePaddingWithHeader(reinterpret_cast<std::size_t>(it), alignment, sizeof(AllocatedBlockHeader));
 		const std::size_t requiredSpace = size + padding;
 		if (it->data.blockSize >= requiredSpace) {
