@@ -5,8 +5,9 @@ namespace {
 	/** Given an address it computes its padding taking into account the passed alignment */
 	const std::size_t ComputePadding(const std::size_t InAddress, const std::size_t InAlignment)
 	{
-		std::size_t padding = InAlignment - (InAddress & InAlignment);
-
+		// if & bitwise operator returns 0 between current address and previous alignment, we are aligned
+		std::size_t padding = InAlignment - (InAddress & (InAlignment - 1));
+		
 		return (padding == InAlignment)
 			? 0 //aligned
 			: padding;
