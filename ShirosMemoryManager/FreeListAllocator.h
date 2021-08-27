@@ -1,5 +1,7 @@
 #pragma once
 
+using std::size_t;
+
 class FreeListAllocator
 {
 public:
@@ -9,10 +11,10 @@ public:
 		FIRST_FIT
 	};
 	
-	FreeListAllocator(const std::size_t TotalSize, const FitPolicy policy);
+	FreeListAllocator(size_t TotalSize, FitPolicy policy);
 	virtual ~FreeListAllocator();
 
-	void* Allocate(const std::size_t AllocationSize, const std::size_t alignment, size_t& OutAllocationSize);
+	void* Allocate(size_t AllocationSize, size_t alignment, size_t& OutAllocationSize);
 	size_t Deallocate(void* ptr);
 	void Reset();
 
@@ -81,7 +83,7 @@ private:
 	/** Internal struct identifying a free block */
 	struct FreeBlockHeader
 	{
-		std::size_t blockSize;
+		size_t blockSize;
 	};
 	/** Internal struct identifying an allocated block */
 	struct AllocatedBlockHeader : FreeBlockHeader
@@ -94,7 +96,7 @@ private:
 	/** Selected FitPolicy*/
 	const FitPolicy m_policy;
 	/** Tracked memory allocated by this allocator*/
-	const std::size_t m_totalSizeAllocated;
+	const size_t m_totalSizeAllocated;
 	/** Internal pointer pointing to the first address of the memory pool*/
 	void* mp_start = nullptr;
 	/** ForwardLinkedList tracking FreeBlock in list*/
@@ -107,10 +109,10 @@ private:
 	void Coalescence(Node* prevBlock, Node* freeBlock);
 	/** Find method that will apply the alghoritm matching the desired FitPolicy */
 	//TODO : Modify FitPolicy selection algorithm maybe using a factory method
-	void Find(const std::size_t size, const std::size_t alignment, std::size_t& padding, Node*& previousNode, Node*& foundNode);
+	void Find(size_t size, size_t alignment, size_t& padding, Node*& previousNode, Node*& foundNode);
 	/** Best fit policy. Find the best freeblock to use among all the blocks. Time complexity is O(N), where N is the number of free blocks */
-	void FindBest(const std::size_t size, const std::size_t alignment, std::size_t& padding, Node*& previousNode, Node*& foundNode);
+	void FindBest(size_t size, size_t alignment, size_t& padding, Node*& previousNode, Node*& foundNode);
 	/** First fit policy. Find the first freeblock able to handle the requested size. Time complexity is O(N), where N is the number of free blocks */
-	void FindFirst(const std::size_t size, const std::size_t alignment, std::size_t& padding, Node*& previousNode, Node*& foundNode);
+	void FindFirst(size_t size, size_t alignment, size_t& padding, Node*& previousNode, Node*& foundNode);
 };
 

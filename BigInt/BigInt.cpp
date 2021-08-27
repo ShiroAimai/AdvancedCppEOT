@@ -48,21 +48,19 @@ namespace
 		return !Value.empty() && std::find_if(Value.begin(), Value.end(), [](unsigned char c) { return !std::isdigit(c); }) == Value.end();
 	}
 
-	//representation that maintains leading zeroes
 	std::string ToStringFormatted(BigInt::DoubleCapacityDataSeed num)
 	{
 		constexpr BigInt::DoubleCapacityDataSeed baseDigits = bigint_entry_digits();
 		
 		std::string format = "%0";
 		format.append(std::to_string(baseDigits - 1)); ///only zeroes
-		format.append(PRIu64);
+		format.append(PRIu64); //append format specifier to correctly format data of DoubleCapacityDataSeed
 
 		char buffer[baseDigits];
-		sprintf_s(buffer, baseDigits, format.c_str(), num);
+		sprintf_s(buffer, baseDigits, format.c_str(), num); //write formatted number to string
 
 		return buffer;
 	}
-
 }
 
 BigInt::DataSeed BigInt::UOperationResult::GetLowerHalf() const

@@ -5,7 +5,7 @@ namespace {
 	auto FixedAllocatorComparator = [](const FixedAllocator& Allocator, size_t bytes) { return Allocator.GetBlockSize() < bytes; };
 }
 
-SmallObjAllocator::SmallObjAllocator(const size_t chunkSize)
+SmallObjAllocator::SmallObjAllocator(size_t chunkSize)
 	: m_chunkSize(chunkSize)
 {
 
@@ -20,7 +20,7 @@ SmallObjAllocator::~SmallObjAllocator()
 	}
 }
 
-void* SmallObjAllocator::Allocate(const size_t bytes, size_t& OutAllocatedMemory)
+void* SmallObjAllocator::Allocate(size_t bytes, size_t& OutAllocatedMemory)
 {
 	OutAllocatedMemory = bytes; //we allocate just the right amount of memory
 
@@ -49,7 +49,7 @@ void* SmallObjAllocator::Allocate(const size_t bytes, size_t& OutAllocatedMemory
 	return p_res;
 }
 
-size_t SmallObjAllocator::Deallocate(void* p_obj, const size_t size_obj)
+size_t SmallObjAllocator::Deallocate(void* p_obj, size_t size_obj)
 {
 	//check if the last time we deallocated something from an allocator, and if that allocator is of the desired size
 	//if it is, then use that one

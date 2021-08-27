@@ -10,7 +10,7 @@ constexpr size_t MAX_SMALL_OBJECT_SIZE = 128;
 class SmallObjAllocator
 {
 public:
-	SmallObjAllocator(const size_t chunkSize);
+	SmallObjAllocator(size_t chunkSize);
 	virtual ~SmallObjAllocator();
 
 	/**
@@ -25,7 +25,7 @@ public:
 	 *@return A pointer to the memory address from which memory was allocated
 	 * 
 	 */
-	void* Allocate(const size_t bytes, size_t& OutAllocatedMemory);
+	void* Allocate(size_t bytes, size_t& OutAllocatedMemory);
 	/**
 	 *	Deallocates memory for SmallObjects
 	 *
@@ -37,7 +37,7 @@ public:
 	 *@return A pointer to the memory address from which memory was allocated
 	 *
 	 */
-	size_t Deallocate(void* p_obj, const size_t size_obj);
+	size_t Deallocate(void* p_obj, size_t size_obj);
 
 	void Reset();
 	inline size_t GetTotalAllocatedMemory() const { return m_totMemoryAllocated; }
