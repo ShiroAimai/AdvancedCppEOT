@@ -18,10 +18,10 @@ namespace {
 		return InHeaderSize + ComputePadding(InAddress + InHeaderSize, InAlignment);
 	}
 
-	/** Check if the given address is aligned with the alignment passed */
+	/** Check if the given address is aligned to the alignment passed */
 	bool isAligned(const std::size_t address, const std::size_t alignment)
 	{
-		return ComputePadding(address, alignment) == 0;
+		return address % alignment== 0;
 	}
 
 }
