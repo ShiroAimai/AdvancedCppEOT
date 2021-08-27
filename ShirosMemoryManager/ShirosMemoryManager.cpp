@@ -26,7 +26,7 @@ ShirosMemoryManager::~ShirosMemoryManager()
 	cout << "===== RELEASED ALLOCATED MEMORY ======" << endl;
 }
 
-void* ShirosMemoryManager::Allocate(const size_t ObjSize, const AllocationType AllocType, const size_t Alignment /* = alignof(std::max_align_t) */)
+void* ShirosMemoryManager::Allocate(size_t ObjSize, AllocationType AllocType, size_t Alignment /* = alignof(std::max_align_t) */)
 {	
 	void* p_res = nullptr;
 

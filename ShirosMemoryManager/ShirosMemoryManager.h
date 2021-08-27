@@ -43,7 +43,7 @@ public:
 	ShirosMemoryManager(const ShirosMemoryManager&) = delete;
 	ShirosMemoryManager& operator=(const ShirosMemoryManager&) = delete;
 
-	void* Allocate(const size_t ObjSize, const AllocationType AllocType, const size_t Alignment = alignof(std::max_align_t));
+	void* Allocate(size_t ObjSize, AllocationType AllocType, size_t Alignment = alignof(std::max_align_t));
 	void Deallocate(void* ptr, size_t ObjSize = 0);
 	
 	void Reset();
