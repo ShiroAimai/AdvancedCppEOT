@@ -54,9 +54,6 @@ public:
 		Iterator() : m_ptr(nullptr) {};
 		Iterator(Node* ptr) : m_ptr(ptr) {};
 		Iterator(const Iterator<IsConst>& other) : m_ptr(other.m_ptr) {};
-		operator Iterator<true>() const { 
-			return Iterator<true>(m_ptr); 
-		};
 
 		Iterator& operator=(const Iterator& other) 
 		{
@@ -123,7 +120,7 @@ public:
 	SList(std::initializer_list<value_type> il);
 
 	//DESTRUCTOR
-	virtual ~SList();
+	~SList();
 
 	//ITERATORS
 	iterator before_begin() noexcept;

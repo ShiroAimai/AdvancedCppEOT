@@ -285,12 +285,12 @@ int main()
 
 		SList<int>::const_iterator cit2 = l2.cbegin();
 		SList<int>::const_iterator cit1 = l1.cbegin();
-		for (; cit2 != l2.end() && cit1 != l1.cend(); ++cit1, ++cit2)
+		for (; cit2 != l2.cend() && cit1 != l1.cend(); ++cit1, ++cit2)
 		{
 			assert(*cit2 == *cit1);
 		}
 
-		assert(cit2 == l2.end() && cit1 == l1.cend());
+		assert(cit2 == l2.cend() && cit1 == l1.cend());
 
 		cout << endl;
 	}
@@ -317,12 +317,12 @@ int main()
 
 		SList<int>::const_iterator cit2 = l2.cbegin();
 		SList<int>::const_iterator cExpc = expected.cbegin();
-		for (; cit2 != l2.end() && cExpc != expected.cend(); ++cExpc, ++cit2)
+		for (; cit2 != l2.cend() && cExpc != expected.cend(); ++cExpc, ++cit2)
 		{
 			assert(*cit2 == *cExpc);
 		}
 
-		assert(cit2 == l2.end() && cExpc == expected.cend());
+		assert(cit2 == l2.cend() && cExpc == expected.cend());
 
 		cout << endl;
 	}
@@ -347,12 +347,12 @@ int main()
 
 		SList<int>::const_iterator cit2 = l2.cbegin();
 		std::initializer_list<int>::iterator ilIt = il.begin();
-		for (; cit2 != l2.end() && ilIt != il.end(); ++ilIt, ++cit2)
+		for (; cit2 != l2.cend() && ilIt != il.end(); ++ilIt, ++cit2)
 		{
 			assert(*cit2 == *ilIt);
 		}
 
-		assert(cit2 == l2.end() && ilIt == il.end());
+		assert(cit2 == l2.cend() && ilIt == il.end());
 
 		cout << endl;
 	}
@@ -383,7 +383,7 @@ int main()
 			assert(*cit == *citExpected);
 		}
 
-		assert(cit == l.cend() && citExpected == expected.end());
+		assert(cit == l.cend() && citExpected == expected.cend());
 
 		cout << endl;
 	}
@@ -417,7 +417,7 @@ int main()
 			assert(*cit == *citExpected);
 		}
 
-		assert(cit == l.cend() && citExpected == expected.end());
+		assert(cit == l.cend() && citExpected == expected.cend());
 
 		cout << endl;
 	}

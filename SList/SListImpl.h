@@ -22,7 +22,7 @@ inline void SList<T>::merge_sort(iterator& it, Comparator comp)
 {
 	if(it.m_ptr == nullptr || it.m_ptr->Next == nullptr) return; //no sort can be applied
 
-	size_type half_list_size = list_size_from(it) / 2;
+	size_type half_list_size = list_size_from(const_iterator(it.m_ptr)) / 2;
 
 	iterator it_half_list = it; //last node in low half list
 	for (size_type i = 0; i < (half_list_size - 1); ++i)
@@ -30,7 +30,8 @@ inline void SList<T>::merge_sort(iterator& it, Comparator comp)
 		++it_half_list; 
 	}
 
-	const_iterator cit_low_half_list_end = it_half_list++;
+	const_iterator cit_low_half_list_end(it_half_list.m_ptr);
+	++it_half_list;
 	cit_low_half_list_end.m_ptr->Next = nullptr; //split half lists
 
 	merge_sort(it, comp);
@@ -40,11 +41,11 @@ inline void SList<T>::merge_sort(iterator& it, Comparator comp)
 	iterator itSorted = comp(*it, *it_half_list) ? it++ : it_half_list++;
 
 	iterator StartSortedList = itSorted;
-	const_iterator cend = nullptr;
+	iterator end = nullptr;
 
-	for (; it != cend; ++itSorted)
+	for (; it != end; ++itSorted)
 	{
-		if (it_half_list == cend)
+		if (it_half_list == end)
 		{
 			itSorted.m_ptr->Next = it.m_ptr;
 			break;
@@ -61,7 +62,7 @@ inline void SList<T>::merge_sort(iterator& it, Comparator comp)
 		}
 	}
 
-	if(it == cend)
+	if(it == end)
 	{
 		itSorted.m_ptr->Next = it_half_list.m_ptr;
 	}
@@ -88,32 +89,32 @@ inline SList<T>::~SList()
 template<class T>
 inline SList<T>::SList(SList::size_type n) : SList()
 {
-	insert_after(before_head, n, value_type());
+	insert_after(cbefore_begin(), n, value_type());
 }
 
 template<class T>
 inline SList<T>::SList(size_type n, const value_type& val) : SList()
 {
-	insert_after(before_head, n, val);
+	insert_after(cbefore_begin(), n, val);
 }
 
 template<class T>
 template<class InputIterator>
 inline SList<T>::SList(InputIterator first, InputIterator last) : SList()
 {
-	insert_after(before_head, first, last);
+	insert_after(cbefore_begin(), first, last);
 }
 
 template<class T>
 inline SList<T>::SList(std::initializer_list<SList<T>::value_type> il) : SList()
 {
-	insert_after(before_head, il);
+	insert_after(cbefore_begin(), il);
 }
 
 template<class T>
 inline SList<T>::SList(const SList& list) : SList()
 {
-	insert_after(before_head, list.cbegin(), list.cend());
+	insert_after(cbefore_begin(), list.cbegin(), list.cend());
 }
 
 template<class T>
@@ -131,7 +132,7 @@ inline typename SList<T>::iterator SList<T>::before_begin() noexcept
 template<class T>
 inline typename SList<T>::const_iterator SList<T>::cbefore_begin() const noexcept
 {
-	return before_head;
+	return const_iterator(before_head.m_ptr);
 }
 
 template<class T>
@@ -144,8 +145,8 @@ inline typename SList<T>::iterator SList<T>::begin() noexcept
 template<class T>
 inline typename SList<T>::const_iterator SList<T>::cbegin() const noexcept
 {
-	const_iterator cbegin = std::next(before_head);
-	return cbegin;
+	iterator Begin = std::next(before_head);
+	return const_iterator(Begin.m_ptr);
 }
 
 template<class T>
@@ -266,14 +267,14 @@ template<class InputIterator>
 inline void SList<T>::assign(InputIterator first, InputIterator last)
 {
 	clear();
-	insert_after(before_head, first, last);
+	insert_after(cbefore_begin(), first, last);
 }
 
 template<class T>
 inline void SList<T>::assign(size_type n, const value_type& val)
 {
 	clear();
-	insert_after(before_head, n, val);
+	insert_after(cbefore_begin(), n, val);
 }
 
 template<class T>
@@ -286,7 +287,7 @@ template<class T>
 template<class... Args>
 inline void SList<T>::emplace_front(Args&&... args)
 {
-	insert_after(before_head, value_type(std::forward<Args>(args)...));
+	insert_after(cbefore_begin(), value_type(std::forward<Args>(args)...));
 }
 
 template<class T>
@@ -299,13 +300,13 @@ inline typename SList<T>::iterator SList<T>::emplace_after(const_iterator positi
 template<class T>
 inline void SList<T>::push_front(const value_type& val)
 {
-	insert_after(before_head, val);
+	insert_after(cbefore_begin(), val);
 }
 
 template<class T>
 inline void SList<T>::push_front(value_type&& val)
 {
-	insert_after(before_head, std::forward<value_type>(val));
+	insert_after(cbefore_begin(), std::forward<value_type>(val));
 }
 
 template<class T>
@@ -393,15 +394,16 @@ inline typename SList<T>::iterator SList<T>::erase_after(const_iterator position
 template<class T>
 inline typename SList<T>::iterator SList<T>::erase_after(const_iterator position, const_iterator last)
 {
-	const_iterator eraseResult = position;
-	for (; eraseResult != last;)
+	iterator eraseResult(position.m_ptr);
+	iterator  lastIterator(last.m_ptr);
+	for (; eraseResult != lastIterator;)
 	{
 		eraseResult = erase_after(position);
 	}
 
-	assert(eraseResult == last);
+	assert(eraseResult == lastIterator);
 
-	return iterator(eraseResult.m_ptr);
+	return eraseResult;
 }
 
 template<class T>
@@ -421,9 +423,9 @@ inline void SList<T>::resize(size_type n, const value_type& val)
 {
 	size_type list_size = 0;
 
-	SList<T>::iterator it = begin();
-	SList<T>::iterator lastIt = before_head;
-	for (; it != end() && list_size < n; ++it)
+	SList<T>::const_iterator it = cbegin();
+	SList<T>::const_iterator lastIt = cbefore_begin();
+	for (; it != cend() && list_size < n; ++it)
 	{
 		++list_size;
 		lastIt = it;
@@ -437,7 +439,7 @@ inline void SList<T>::resize(size_type n, const value_type& val)
 	}
 	else //erase all elements from lastIt to tail
 	{
-		erase_after(lastIt, end());
+		erase_after(lastIt, cend());
 	}
 }
 
@@ -451,7 +453,7 @@ template<class T>
 inline void SList<T>::remove(const value_type& value)
 {
 	SList<T>::iterator it = begin();
-	SList<T>::iterator lastIt = before_head;
+	SList<T>::const_iterator lastIt = cbefore_begin();
 	for (; it != end();)
 	{
 		if (*it == value)
@@ -461,7 +463,7 @@ inline void SList<T>::remove(const value_type& value)
 			it = erase_after(lastIt);
 		}
 		else {
-			lastIt = it;
+			lastIt.m_ptr = it.m_ptr;
 			++it;
 		}
 	}
@@ -519,8 +521,8 @@ inline void SList<T>::reverse() noexcept
 template<class T>
 inline void SList<T>::unique()
 {
-	SList<T>::iterator it = begin();
-	SList<T>::iterator lastIt = it++;
+	SList<T>::iterator it = std::next(begin());
+	SList<T>::const_iterator lastIt = cbegin();
 	
 	for (; it != end();)
 	{
@@ -530,7 +532,7 @@ inline void SList<T>::unique()
 		}
 		else
 		{
-			lastIt = it;
+			lastIt.m_ptr = it.m_ptr;
 			++it;
 		}
 	}
@@ -540,8 +542,8 @@ template<class T>
 template<class BinaryPredicate>
 inline void SList<T>::unique(BinaryPredicate binary_pred)
 {
-	SList<T>::iterator it = begin();
-	SList<T>::iterator lastIt = it++;
+	SList<T>::iterator it = std::next(begin());
+	SList<T>::const_iterator lastIt = cbegin();
 
 	for (; it != end();)
 	{
@@ -551,7 +553,7 @@ inline void SList<T>::unique(BinaryPredicate binary_pred)
 		}
 		else
 		{
-			lastIt = it;
+			lastIt.m_ptr = it.m_ptr;
 			++it;
 		}
 	}
@@ -582,7 +584,6 @@ inline void SList<T>::splice_after(const_iterator position, SList&& other)
 {
 	splice_after(position, other);
 }
-
 
 template<class T>
 inline void SList<T>::splice_after(const_iterator position, SList& other, const_iterator i)
