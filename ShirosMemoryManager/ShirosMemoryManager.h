@@ -38,7 +38,7 @@ public:
 	static void Init(const ShirosMMCreationParams& params);
 	static ShirosMemoryManager& Get();
 
-	virtual ~ShirosMemoryManager();
+	~ShirosMemoryManager();
 	/** Prevent copy for this class */
 	ShirosMemoryManager(const ShirosMemoryManager&) = delete;
 	ShirosMemoryManager& operator=(const ShirosMemoryManager&) = delete;

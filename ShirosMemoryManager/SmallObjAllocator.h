@@ -11,7 +11,7 @@ class SmallObjAllocator
 {
 public:
 	SmallObjAllocator(size_t chunkSize);
-	virtual ~SmallObjAllocator();
+	~SmallObjAllocator();
 
 	/**
 	 *	Allocates memory for SmallObjects

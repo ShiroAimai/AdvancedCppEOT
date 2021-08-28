@@ -75,6 +75,7 @@ void ShirosMemoryManager::Deallocate(void* ptr, size_t ObjSize /* = 0 */)
 	if (!ptr) //bad argument
 	{
 		cout << "Aborting deallocation. Bad argument: address: " << ptr << endl;
+		return;
 	}
 
 	//if ObjSize is empty, check if ptr is key of internal array map 

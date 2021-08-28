@@ -12,7 +12,7 @@ public:
 	};
 	
 	FreeListAllocator(size_t TotalSize, FitPolicy policy);
-	virtual ~FreeListAllocator();
+	~FreeListAllocator();
 
 	void* Allocate(size_t AllocationSize, size_t alignment, size_t& OutAllocationSize);
 	size_t Deallocate(void* ptr);
