@@ -85,7 +85,7 @@ int main()
 		BigInt a("222333222333");
 		cout << "A " << a << endl;
 		BigInt b("888666444222");
-		cout << "B " << b << endl;;
+		cout << "B " << b << endl;
 
 		BigInt c = a * b;
 

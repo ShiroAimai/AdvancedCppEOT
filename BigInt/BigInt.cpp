@@ -527,6 +527,8 @@ BigInt& BigInt::operator%=(const BigInt& rhs)
 
 BigInt& BigInt::operator&=(const BigInt& rhs)
 {
+	//TODO We can iterate on the smaller one between this and rhs
+	
 	//execute & based on my length, if rhs is longer ignore the next part
 	for (size_t index = 0; index < m_value.size(); ++index)
 	{
